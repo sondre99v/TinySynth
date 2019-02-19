@@ -30,8 +30,8 @@ typedef struct {
 } oscillator_t;
 
 
-extern oscillator_t OscillatorA;
-extern oscillator_t OscillatorB;
+extern volatile oscillator_t OscillatorA;
+extern volatile oscillator_t OscillatorB;
 
 
 void oscillator_start(oscillator_t* osc);
