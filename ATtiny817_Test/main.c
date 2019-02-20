@@ -31,6 +31,8 @@ int main(void)
 	CCP = CCP_IOREG_gc;
 	CLKCTRL.MCLKCTRLB = 0;
 	
+	PORTB.PIN5CTRL = PORT_PULLUPEN_bm;
+	
 	time_us = 0;
 	
 	int freqs[] = {262, 294, 330, 349, 392, 440, 494, 523};

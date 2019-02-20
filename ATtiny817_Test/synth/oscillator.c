@@ -31,9 +31,9 @@ static const uint8_t wave_sin[SAMPLES_PR_WAVE] = {
 
 
 volatile oscillator_t OscillatorA = {
-	.waveform = WAVE_SINE,
+	.waveform = WAVE_SQUARE,
 	.frequency_dHz = 4400,
-	.amplitude = 128,
+	.amplitude = 255,
 	.filter_value = 0
 };
 
@@ -41,14 +41,14 @@ static volatile uint8_t wave_index_A = 0;
 static volatile uint8_t prev_value_A = 0;
 
 volatile oscillator_t OscillatorB = {
-	.waveform = WAVE_SINE,
+	.waveform = WAVE_SQUARE,
 	.frequency_dHz = 4400,
-	.amplitude = 128,
+	.amplitude = 255,
 	.filter_value = 0
 };
 
-static volatile uint8_t wave_index_B = 0;
-static volatile uint8_t prev_value_B = 0;
+static volatile int8_t wave_index_B = 0;
+static volatile int8_t prev_value_B = 0;
 
 
 void oscillator_start(oscillator_t* osc) {
@@ -58,13 +58,17 @@ void oscillator_start(oscillator_t* osc) {
 	// Enable the DAC and enable the output
 	DAC0.CTRLA = DAC_OUTEN_bm | DAC_ENABLE_bm;
 	
+	DAC0.DATA = 128;
+	
 	// Enable the correct oscillator
 	if (osc == &OscillatorA) {
+		TCA0.SINGLE.PERBUF = MAIN_CLOCK_FREQUENCY_HZ / ((uint32_t)OscillatorA.frequency_dHz * SAMPLES_PR_WAVE / 10);
 		TCA0.SINGLE.INTCTRL = TCA_SINGLE_OVF_bm;
 		TCA0.SINGLE.CTRLA = TCA_SINGLE_ENABLE_bm;
 	}
 	
 	if (osc == &OscillatorB) {
+		TCB0.CCMP = MAIN_CLOCK_FREQUENCY_HZ / ((uint32_t)OscillatorB.frequency_dHz * SAMPLES_PR_WAVE / 10);
 		TCB0.INTCTRL = TCB_CAPT_bm;
 		TCB0.CTRLA = TCB_ENABLE_bm;
 	}
@@ -91,27 +95,27 @@ ISR(TCA0_OVF_vect) {
 		wave_index_A = 0;
 	}
 
-	uint8_t level;
+	int8_t level;
 
 	switch(OscillatorA.waveform) {
 		case WAVE_SAW: 
-			level = wave_saw[wave_index_A];
+			level = (int16_t)wave_saw[wave_index_A] - 128;
 			break;
 		case WAVE_TRIANGLE: 
-			level = wave_tri[wave_index_A];
+			level = (int16_t)wave_tri[wave_index_A] - 128;
 			break;
 		case WAVE_SQUARE: 
-			level = wave_squ[wave_index_A];
+			level = (int16_t)wave_squ[wave_index_A] - 128;
 			break;
 		case WAVE_SINE: 
-			level = wave_sin[wave_index_A]; 
+			level = (int16_t)wave_sin[wave_index_A] - 128; 
 			break;
 		default:
 			level = 128;
 			break;
 	}
 	
-	//level = (uint8_t)((uint16_t)OscillatorA.amplitude * level) >> 8;
+	level = (((uint16_t)OscillatorA.amplitude + 1) * level + 128) >> 8;
 	
 	// Write output value
 	volatile int16_t change = level - prev_value_A;
@@ -119,7 +123,7 @@ ISR(TCA0_OVF_vect) {
 	DAC0.DATA += change;
 	
 	// Update frequency
-	TCA0.SINGLE.PERBUF = MAIN_CLOCK_FREQUENCY_HZ / (OscillatorA.frequency_dHz * SAMPLES_PR_WAVE / 10);
+	TCA0.SINGLE.PERBUF = MAIN_CLOCK_FREQUENCY_HZ / ((uint32_t)OscillatorA.frequency_dHz * SAMPLES_PR_WAVE / 10);
 }
 
 ISR(TCB0_INT_vect) {
@@ -132,27 +136,27 @@ ISR(TCB0_INT_vect) {
 		wave_index_B = 0;
 	}
 
-	uint8_t level;
+	int8_t level;
 
 	switch(OscillatorB.waveform) {
 		case WAVE_SAW:
-			level = wave_saw[wave_index_B];
+			level = (int16_t)wave_saw[wave_index_B] - 128;
 			break;
 		case WAVE_TRIANGLE:
-			level = wave_tri[wave_index_B];
+			level = (int16_t)wave_tri[wave_index_B] - 128;
 			break;
 		case WAVE_SQUARE:
-			level = wave_squ[wave_index_B];
+			level = (int16_t)wave_squ[wave_index_B] - 128;
 			break;
 		case WAVE_SINE:
-			level = wave_sin[wave_index_B];
+			level = (int16_t)wave_sin[wave_index_B] - 128;
 			break;
 		default:
 			level = 128;
 			break;
 	}
 	
-	//level = (uint8_t)((uint16_t)OscillatorB.amplitude * level) >> 8;
+	level = (((uint16_t)OscillatorB.amplitude + 1) * level + 128) >> 8;
 	
 	// Write output value
 	volatile int16_t change = level - prev_value_B;
@@ -160,5 +164,5 @@ ISR(TCB0_INT_vect) {
 	DAC0.DATA += change;
 	
 	// Update frequency
-	TCB0.CCMP = MAIN_CLOCK_FREQUENCY_HZ / (OscillatorB.frequency_dHz * SAMPLES_PR_WAVE / 10);
+	TCB0.CCMP = MAIN_CLOCK_FREQUENCY_HZ / ((uint32_t)OscillatorB.frequency_dHz * SAMPLES_PR_WAVE / 10);
 }
