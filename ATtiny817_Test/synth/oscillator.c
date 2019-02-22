@@ -36,29 +36,29 @@ static const int8_t wave_sin[SAMPLES_PR_WAVE] = {
 
 typedef struct {
 	waveform_t waveform;
-	uint16_t frequency_dHz;
 	uint8_t amplitude;
 	uint8_t filter_value;
 	int8_t prev_sample;
 	uint8_t wave_index;
+	uint16_t timer_period;
 } osc_values_t;
 
 volatile osc_values_t OscA = {
 	.waveform = WAVE_SINE,
-	.frequency_dHz = 4400,
 	.amplitude = 0,
 	.filter_value = 0,
 	.prev_sample = 0,
-	.wave_index = 0
+	.wave_index = 0,
+	.timer_period = 2000
 };
 
 static volatile osc_values_t OscB = {
 	.waveform = WAVE_SINE,
-	.frequency_dHz = 4400,
 	.amplitude = 0,
 	.filter_value = 0,
 	.prev_sample = 0,
-	.wave_index = 0
+	.wave_index = 0,
+	.timer_period = 2000
 };
 
 
@@ -74,11 +74,11 @@ void osc_init()
 	DAC0.DATA = DAC_REST_VALUE;
 	
 	// Enable the oscillators
-	TCA0.SINGLE.PERBUF = MAIN_CLOCK_FREQUENCY_HZ * 10 / ((uint32_t)OscA.frequency_dHz * SAMPLES_PR_WAVE);
+	TCA0.SINGLE.PERBUF = OscA.timer_period;
 	TCA0.SINGLE.INTCTRL = TCA_SINGLE_OVF_bm;
 	TCA0.SINGLE.CTRLA = TCA_SINGLE_ENABLE_bm;
 	
-	TCB0.CCMP = MAIN_CLOCK_FREQUENCY_HZ * 10 / ((uint32_t)OscB.frequency_dHz * SAMPLES_PR_WAVE);
+	TCB0.CCMP = OscB.timer_period;
 	TCB0.INTCTRL = TCB_CAPT_bm;
 	TCB0.CTRLA = TCB_ENABLE_bm;
 }
@@ -95,16 +95,16 @@ void osc_set_waveform(oscillator_t osc, waveform_t waveform)
 	}
 }
 
+uint16_t bPer = 0;
+
 void osc_set_frequency(oscillator_t osc, uint16_t frequency_dHz)
 {
 	if (osc == OSCILLATOR_A) {
-		OscA.frequency_dHz = frequency_dHz;
-		TCA0.SINGLE.PERBUF = MAIN_CLOCK_FREQUENCY_HZ * 10 / ((uint32_t)OscA.frequency_dHz * SAMPLES_PR_WAVE);
+		OscA.timer_period = MAIN_CLOCK_FREQUENCY_HZ * 10 / ((uint32_t)frequency_dHz * SAMPLES_PR_WAVE);
 	}
 	
 	if (osc == OSCILLATOR_B) {
-		OscB.frequency_dHz = frequency_dHz;
-		TCB0.CCMP = MAIN_CLOCK_FREQUENCY_HZ * 10 / ((uint32_t)OscB.frequency_dHz * SAMPLES_PR_WAVE);
+		OscB.timer_period = MAIN_CLOCK_FREQUENCY_HZ * 10 / ((uint32_t)frequency_dHz * SAMPLES_PR_WAVE);
 	}
 }
 
@@ -121,7 +121,7 @@ void osc_set_amplitude(oscillator_t osc, uint8_t amplitude)
 
 void osc_set_filter_value(oscillator_t osc, uint8_t filter_value)
 {
-
+	
 }
 
 
@@ -130,9 +130,8 @@ void osc_set_filter_value(oscillator_t osc, uint8_t filter_value)
 // Interrupt handler for oscillator A
 ISR(TCA0_OVF_vect)
 {
-	// Clear interrupt flag and set timing beacon
+	// Clear interrupt flag
 	TCA0.SINGLE.INTFLAGS = TCA_SINGLE_OVF_bm;
-	PORTC.OUTSET = (1 << 1);
 	
 	// Compute next sample value
 	volatile int16_t sample;
@@ -177,10 +176,9 @@ ISR(TCA0_OVF_vect)
 	if (OscA.wave_index == SAMPLES_PR_WAVE) {
 		OscA.wave_index = 0;
 	}
-
-	// Clear timing beacon
-	PORTC.OUTCLR = (1 << 1);
 	
+	TCA0.SINGLE.PER = OscA.timer_period;
+
 	// Check for timing violation
 	if (TCA0.SINGLE.CNT > TCA0.SINGLE.PER / 2) {
 		PORTB.OUTCLR = (1 << 4);
@@ -191,10 +189,9 @@ ISR(TCA0_OVF_vect)
 // Interrupt handler for oscillator B
 ISR(TCB0_INT_vect)
 {
-	// Clear interrupt flag and set timing beacon
+	// Clear interrupt flag
 	TCB0.INTFLAGS = TCB_CAPT_bm;
-	PORTC.OUTSET = (1 << 3);
-
+	
 	// Compute next sample value
 	volatile int16_t sample;
 
@@ -237,11 +234,13 @@ ISR(TCB0_INT_vect)
 	OscB.wave_index++;
 	if (OscB.wave_index == SAMPLES_PR_WAVE) {
 		OscB.wave_index = 0;
-	}
 
-	// Clear timing beacon
-	PORTC.OUTCLR = (1 << 3);
+		// Sync
+		//OscA.wave_index = 0;
+	}
 	
+	TCB0.CCMP = OscB.timer_period;
+
 	// Check for timing violation
 	if (TCB0.CNT > TCB0.CCMP / 2) {
 		PORTB.OUTCLR = (1 << 4);
