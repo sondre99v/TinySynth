@@ -53,22 +53,22 @@ int main(void)
 
 	sei();
 	
-	//osc_set_waveform(OSCILLATOR_A, WAVE_SQUARE);
-	//osc_set_waveform(OSCILLATOR_B, WAVE_SQUARE);
+	osc_set_waveform(OSCILLATOR_A, WAVE_SQUARE);
+	osc_set_waveform(OSCILLATOR_B, WAVE_SINE);
 	osc_set_frequency(OSCILLATOR_A, 4400);
 	osc_set_frequency(OSCILLATOR_B, 4400);
 	
     while (1)
     {
 	    if (!(PORTB.IN & (1<<5))) {
-		    osc_set_amplitude(OSCILLATOR_A, 50);
+		    osc_set_amplitude(OSCILLATOR_A, 100);
 		}
 		else {
 			osc_set_amplitude(OSCILLATOR_A, 0);
 		}
 
 		if (!(PORTC.IN & (1<<5))) {
-			osc_set_amplitude(OSCILLATOR_B, 50);
+			osc_set_amplitude(OSCILLATOR_B, 100);
 		}
 		else {
 			osc_set_amplitude(OSCILLATOR_B, 0);

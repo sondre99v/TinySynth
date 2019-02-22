@@ -13,23 +13,24 @@
 #define SAMPLES_PR_WAVE 32
 #define MAIN_CLOCK_FREQUENCY_HZ 19726000ULL
 #define DAC_REST_VALUE 0x80
-#define DAC_MIN_VALUE 0
-#define DAC_MAX_VALUE 255
+#define DAC_MIN_VALUE 0x20
+#define DAC_MAX_VALUE 0xDF
 
-static const uint8_t wave_squ[SAMPLES_PR_WAVE] = {
-	28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,228,228,228,228,228,228,228,228,228,228,228,228,228,228,228,228
+
+static const int8_t wave_squ[SAMPLES_PR_WAVE] = {
+	127,127,127,127,127,127,127,127,127,127,127,127,127,127,127,127,-128,-128,-128,-128,-128,-128,-128,-128,-128,-128,-128,-128,-128,-128,-128,-128
 };
 
-static const uint8_t wave_saw[SAMPLES_PR_WAVE] = {
-	28,35,41,47,54,60,67,73,80,86,93,99,105,112,118,125,131,138,144,151,157,164,170,176,183,189,196,202,209,215,222,228
+static const int8_t wave_saw[SAMPLES_PR_WAVE] = {
+	4,12,20,28,36,45,53,61,69,77,86,94,102,110,118,127,-128,-119,-111,-103,-95,-87,-78,-70,-62,-54,-46,-37,-29,-21,-13,-5
 };
 
-static const uint8_t wave_tri[SAMPLES_PR_WAVE] = {
-	128,141,153,166,178,191,203,216,228,216,203,191,178,166,153,141,128,116,103,91,78,66,53,41,28,41,53,66,78,91,103,116
+static const int8_t wave_tri[SAMPLES_PR_WAVE] = {
+	-1,15,31,47,63,79,95,111,127,111,95,79,63,47,31,15,-1,-16,-32,-48,-64,-80,-96,-112,-128,-112,-96,-80,-64,-48,-32,-16
 };
 
-static const uint8_t wave_sin[SAMPLES_PR_WAVE] = {
-	128,148,166,184,199,211,220,226,228,226,220,211,199,184,166,148,128,109,90,72,57,45,36,30,28,30,36,45,57,72,90,109
+static const int8_t wave_sin[SAMPLES_PR_WAVE] = {
+	-1,24,48,70,89,105,117,124,127,124,117,105,89,70,48,24,-1,-25,-49,-71,-90,-106,-118,-125,-128,-125,-118,-106,-90,-71,-49,-25
 };
 
 
@@ -38,7 +39,7 @@ typedef struct {
 	uint16_t frequency_dHz;
 	uint8_t amplitude;
 	uint8_t filter_value;
-	uint8_t prev_value;
+	int8_t prev_sample;
 	uint8_t wave_index;
 } osc_values_t;
 
@@ -47,7 +48,7 @@ volatile osc_values_t OscA = {
 	.frequency_dHz = 4400,
 	.amplitude = 0,
 	.filter_value = 0,
-	.prev_value = DAC_REST_VALUE,
+	.prev_sample = 0,
 	.wave_index = 0
 };
 
@@ -56,7 +57,7 @@ static volatile osc_values_t OscB = {
 	.frequency_dHz = 4400,
 	.amplitude = 0,
 	.filter_value = 0,
-	.prev_value = DAC_REST_VALUE,
+	.prev_sample = 0,
 	.wave_index = 0
 };
 
@@ -133,33 +134,42 @@ ISR(TCA0_OVF_vect)
 	TCA0.SINGLE.INTFLAGS = TCA_SINGLE_OVF_bm;
 	PORTC.OUTSET = (1 << 1);
 	
-	// Compute next sample value (TODO: change lookup tables to signed values)
-	volatile int16_t level;
+	// Compute next sample value
+	volatile int16_t sample;
 
 	switch(OscA.waveform) {
 		case WAVE_SAW: 
-			level = (int16_t)wave_saw[OscA.wave_index] - 128;
+			sample = (int16_t)wave_saw[OscA.wave_index];
 			break;
 		case WAVE_TRIANGLE: 
-			level = (int16_t)wave_tri[OscA.wave_index] - 128;
+			sample = (int16_t)wave_tri[OscA.wave_index];
 			break;
 		case WAVE_SQUARE: 
-			level = (int16_t)wave_squ[OscA.wave_index] - 128;
+			sample = (int16_t)wave_squ[OscA.wave_index];
 			break;
 		case WAVE_SINE: 
-			level = (int16_t)wave_sin[OscA.wave_index] - 128; 
+			sample = (int16_t)wave_sin[OscA.wave_index];
 			break;
 		default:
-			level = 128;
+			sample = 0;
 			break;
 	}
 	
-	level = (((uint16_t)OscA.amplitude + 1) * level + 128) >> 8;
-	
+	sample = (((int16_t)OscA.amplitude + 1) * sample + 128) / 256;
 	
 	// Write output value
-	volatile int16_t change = level - OscA.prev_value;
-	OscA.prev_value += change;
+	volatile int16_t change = sample - OscA.prev_sample;
+	volatile int16_t current_data = (int16_t)(DAC0.DATA);
+	volatile int16_t new_data = current_data + change;
+
+	if (new_data > DAC_MAX_VALUE) {
+		change -= new_data - DAC_MAX_VALUE;
+	}
+	else if (new_data < DAC_MIN_VALUE) {
+		change += DAC_MIN_VALUE - new_data;
+	}
+
+	OscA.prev_sample += change;
 	DAC0.DATA += change;
 	
 	// Compute current location within wave period
@@ -185,32 +195,42 @@ ISR(TCB0_INT_vect)
 	TCB0.INTFLAGS = TCB_CAPT_bm;
 	PORTC.OUTSET = (1 << 3);
 
-	// Compute next sample value (TODO: change lookup tables to signed values)
-	int8_t level;
+	// Compute next sample value
+	volatile int16_t sample;
 
 	switch(OscB.waveform) {
 		case WAVE_SAW:
-			level = (int16_t)wave_saw[OscB.wave_index] - 128;
+			sample = (int16_t)wave_saw[OscB.wave_index];
 			break;
 		case WAVE_TRIANGLE:
-			level = (int16_t)wave_tri[OscB.wave_index] - 128;
+			sample = (int16_t)wave_tri[OscB.wave_index];
 			break;
 		case WAVE_SQUARE:
-			level = (int16_t)wave_squ[OscB.wave_index] - 128;
+			sample = (int16_t)wave_squ[OscB.wave_index];
 			break;
 		case WAVE_SINE:
-			level = (int16_t)wave_sin[OscB.wave_index] - 128;
+			sample = (int16_t)wave_sin[OscB.wave_index];
 			break;
 		default:
-			level = 128;
+			sample = 0;
 			break;
 	}
 	
-	level = (((uint16_t)OscB.amplitude + 1) * level + 128) >> 8;
+	sample = (((int16_t)OscB.amplitude + 1) * sample + 128) / 256;
 	
 	// Write output value
-	volatile int16_t change = level - OscB.prev_value;
-	OscB.prev_value += change;
+	volatile int16_t change = sample - OscB.prev_sample;
+	volatile int16_t current_data = (int16_t)(DAC0.DATA);
+	volatile int16_t new_data = current_data + change;
+
+	if (new_data > DAC_MAX_VALUE) {
+		change -= new_data - DAC_MAX_VALUE;
+	}
+	else if (new_data < DAC_MIN_VALUE) {
+		change += DAC_MIN_VALUE - new_data;
+	}
+
+	OscB.prev_sample += change;
 	DAC0.DATA += change;
 	
 	// Compute current location within wave period
