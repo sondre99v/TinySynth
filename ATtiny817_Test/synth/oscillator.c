@@ -12,6 +12,9 @@
 
 #define SAMPLES_PR_WAVE 32
 #define MAIN_CLOCK_FREQUENCY_HZ 19726000ULL
+#define DAC_REST_VALUE 0x80
+#define DAC_MIN_VALUE 0
+#define DAC_MAX_VALUE 255
 
 static const uint8_t wave_squ[SAMPLES_PR_WAVE] = {
 	28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,228,228,228,228,228,228,228,228,228,228,228,228,228,228,228,228
@@ -30,139 +33,197 @@ static const uint8_t wave_sin[SAMPLES_PR_WAVE] = {
 };
 
 
-volatile oscillator_t OscillatorA = {
-	.waveform = WAVE_SQUARE,
+typedef struct {
+	waveform_t waveform;
+	uint16_t frequency_dHz;
+	uint8_t amplitude;
+	uint8_t filter_value;
+	uint8_t prev_value;
+	uint8_t wave_index;
+} osc_values_t;
+
+volatile osc_values_t OscA = {
+	.waveform = WAVE_SINE,
 	.frequency_dHz = 4400,
-	.amplitude = 255,
-	.filter_value = 0
+	.amplitude = 0,
+	.filter_value = 0,
+	.prev_value = DAC_REST_VALUE,
+	.wave_index = 0
 };
 
-static volatile uint8_t wave_index_A = 0;
-static volatile uint8_t prev_value_A = 0;
-
-volatile oscillator_t OscillatorB = {
-	.waveform = WAVE_SQUARE,
+static volatile osc_values_t OscB = {
+	.waveform = WAVE_SINE,
 	.frequency_dHz = 4400,
-	.amplitude = 255,
-	.filter_value = 0
+	.amplitude = 0,
+	.filter_value = 0,
+	.prev_value = DAC_REST_VALUE,
+	.wave_index = 0
 };
 
-static volatile int8_t wave_index_B = 0;
-static volatile int8_t prev_value_B = 0;
 
-
-void oscillator_start(oscillator_t* osc) {
+void osc_init()
+{
 	// Enable the chosen reference for the DAC
 	VREF.CTRLA = (VREF_DAC0REFSEL_2V5_gc << VREF_DAC0REFSEL0_bp);
 	
 	// Enable the DAC and enable the output
 	DAC0.CTRLA = DAC_OUTEN_bm | DAC_ENABLE_bm;
 	
-	DAC0.DATA = 128;
+	// Set output to resting value
+	DAC0.DATA = DAC_REST_VALUE;
 	
-	// Enable the correct oscillator
-	if (osc == &OscillatorA) {
-		TCA0.SINGLE.PERBUF = MAIN_CLOCK_FREQUENCY_HZ / ((uint32_t)OscillatorA.frequency_dHz * SAMPLES_PR_WAVE / 10);
-		TCA0.SINGLE.INTCTRL = TCA_SINGLE_OVF_bm;
-		TCA0.SINGLE.CTRLA = TCA_SINGLE_ENABLE_bm;
-	}
+	// Enable the oscillators
+	TCA0.SINGLE.PERBUF = MAIN_CLOCK_FREQUENCY_HZ * 10 / ((uint32_t)OscA.frequency_dHz * SAMPLES_PR_WAVE);
+	TCA0.SINGLE.INTCTRL = TCA_SINGLE_OVF_bm;
+	TCA0.SINGLE.CTRLA = TCA_SINGLE_ENABLE_bm;
 	
-	if (osc == &OscillatorB) {
-		TCB0.CCMP = MAIN_CLOCK_FREQUENCY_HZ / ((uint32_t)OscillatorB.frequency_dHz * SAMPLES_PR_WAVE / 10);
-		TCB0.INTCTRL = TCB_CAPT_bm;
-		TCB0.CTRLA = TCB_ENABLE_bm;
-	}
-}
-
-void oscillator_stop(oscillator_t* osc) {
-	if (osc == &OscillatorA) {
-		TCA0.SINGLE.CTRLA = 0;
-	}
-	
-	if (osc == &OscillatorB) {
-		TCB0.CTRLA = 0;
-	}
+	TCB0.CCMP = MAIN_CLOCK_FREQUENCY_HZ * 10 / ((uint32_t)OscB.frequency_dHz * SAMPLES_PR_WAVE);
+	TCB0.INTCTRL = TCB_CAPT_bm;
+	TCB0.CTRLA = TCB_ENABLE_bm;
 }
 
 
-ISR(TCA0_OVF_vect) {
-	// Clear interrupt flag
+void osc_set_waveform(oscillator_t osc, waveform_t waveform)
+{
+	if (osc == OSCILLATOR_A) {
+		OscA.waveform = waveform;
+	}
+	
+	if (osc == OSCILLATOR_B) {
+		OscB.waveform = waveform;
+	}
+}
+
+void osc_set_frequency(oscillator_t osc, uint16_t frequency_dHz)
+{
+	if (osc == OSCILLATOR_A) {
+		OscA.frequency_dHz = frequency_dHz;
+		TCA0.SINGLE.PERBUF = MAIN_CLOCK_FREQUENCY_HZ * 10 / ((uint32_t)OscA.frequency_dHz * SAMPLES_PR_WAVE);
+	}
+	
+	if (osc == OSCILLATOR_B) {
+		OscB.frequency_dHz = frequency_dHz;
+		TCB0.CCMP = MAIN_CLOCK_FREQUENCY_HZ * 10 / ((uint32_t)OscB.frequency_dHz * SAMPLES_PR_WAVE);
+	}
+}
+
+void osc_set_amplitude(oscillator_t osc, uint8_t amplitude)
+{
+	if (osc == OSCILLATOR_A) {
+		OscA.amplitude = amplitude;
+	}
+	
+	if (osc == OSCILLATOR_B) {
+		OscB.amplitude = amplitude;
+	}
+}
+
+void osc_set_filter_value(oscillator_t osc, uint8_t filter_value)
+{
+
+}
+
+
+
+
+// Interrupt handler for oscillator A
+ISR(TCA0_OVF_vect)
+{
+	// Clear interrupt flag and set timing beacon
 	TCA0.SINGLE.INTFLAGS = TCA_SINGLE_OVF_bm;
+	PORTC.OUTSET = (1 << 1);
+	
+	// Compute next sample value (TODO: change lookup tables to signed values)
+	volatile int16_t level;
 
-	// Compute current location within wave period
-	wave_index_A++;
-	if (wave_index_A == SAMPLES_PR_WAVE) {
-		wave_index_A = 0;
-	}
-
-	int8_t level;
-
-	switch(OscillatorA.waveform) {
+	switch(OscA.waveform) {
 		case WAVE_SAW: 
-			level = (int16_t)wave_saw[wave_index_A] - 128;
+			level = (int16_t)wave_saw[OscA.wave_index] - 128;
 			break;
 		case WAVE_TRIANGLE: 
-			level = (int16_t)wave_tri[wave_index_A] - 128;
+			level = (int16_t)wave_tri[OscA.wave_index] - 128;
 			break;
 		case WAVE_SQUARE: 
-			level = (int16_t)wave_squ[wave_index_A] - 128;
+			level = (int16_t)wave_squ[OscA.wave_index] - 128;
 			break;
 		case WAVE_SINE: 
-			level = (int16_t)wave_sin[wave_index_A] - 128; 
+			level = (int16_t)wave_sin[OscA.wave_index] - 128; 
 			break;
 		default:
 			level = 128;
 			break;
 	}
 	
-	level = (((uint16_t)OscillatorA.amplitude + 1) * level + 128) >> 8;
+	level = (((uint16_t)OscA.amplitude + 1) * level + 128) >> 8;
+	
 	
 	// Write output value
-	volatile int16_t change = level - prev_value_A;
-	prev_value_A += change;
+	volatile int16_t change = level - OscA.prev_value;
+	OscA.prev_value += change;
 	DAC0.DATA += change;
 	
-	// Update frequency
-	TCA0.SINGLE.PERBUF = MAIN_CLOCK_FREQUENCY_HZ / ((uint32_t)OscillatorA.frequency_dHz * SAMPLES_PR_WAVE / 10);
+	// Compute current location within wave period
+	OscA.wave_index++;
+	if (OscA.wave_index == SAMPLES_PR_WAVE) {
+		OscA.wave_index = 0;
+	}
+
+	// Clear timing beacon
+	PORTC.OUTCLR = (1 << 1);
+	
+	// Check for timing violation
+	if (TCA0.SINGLE.CNT > TCA0.SINGLE.PER / 2) {
+		PORTB.OUTCLR = (1 << 4);
+	} else {
+	}
 }
 
-ISR(TCB0_INT_vect) {
-	// Clear interrupt flag
+// Interrupt handler for oscillator B
+ISR(TCB0_INT_vect)
+{
+	// Clear interrupt flag and set timing beacon
 	TCB0.INTFLAGS = TCB_CAPT_bm;
+	PORTC.OUTSET = (1 << 3);
 
-	// Compute current location within wave period
-	wave_index_B++;
-	if (wave_index_B == SAMPLES_PR_WAVE) {
-		wave_index_B = 0;
-	}
-
+	// Compute next sample value (TODO: change lookup tables to signed values)
 	int8_t level;
 
-	switch(OscillatorB.waveform) {
+	switch(OscB.waveform) {
 		case WAVE_SAW:
-			level = (int16_t)wave_saw[wave_index_B] - 128;
+			level = (int16_t)wave_saw[OscB.wave_index] - 128;
 			break;
 		case WAVE_TRIANGLE:
-			level = (int16_t)wave_tri[wave_index_B] - 128;
+			level = (int16_t)wave_tri[OscB.wave_index] - 128;
 			break;
 		case WAVE_SQUARE:
-			level = (int16_t)wave_squ[wave_index_B] - 128;
+			level = (int16_t)wave_squ[OscB.wave_index] - 128;
 			break;
 		case WAVE_SINE:
-			level = (int16_t)wave_sin[wave_index_B] - 128;
+			level = (int16_t)wave_sin[OscB.wave_index] - 128;
 			break;
 		default:
 			level = 128;
 			break;
 	}
 	
-	level = (((uint16_t)OscillatorB.amplitude + 1) * level + 128) >> 8;
+	level = (((uint16_t)OscB.amplitude + 1) * level + 128) >> 8;
 	
 	// Write output value
-	volatile int16_t change = level - prev_value_B;
-	prev_value_B += change;
+	volatile int16_t change = level - OscB.prev_value;
+	OscB.prev_value += change;
 	DAC0.DATA += change;
 	
-	// Update frequency
-	TCB0.CCMP = MAIN_CLOCK_FREQUENCY_HZ / ((uint32_t)OscillatorB.frequency_dHz * SAMPLES_PR_WAVE / 10);
+	// Compute current location within wave period
+	OscB.wave_index++;
+	if (OscB.wave_index == SAMPLES_PR_WAVE) {
+		OscB.wave_index = 0;
+	}
+
+	// Clear timing beacon
+	PORTC.OUTCLR = (1 << 3);
+	
+	// Check for timing violation
+	if (TCB0.CNT > TCB0.CCMP / 2) {
+		PORTB.OUTCLR = (1 << 4);
+	}
 }

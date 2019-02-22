@@ -21,20 +21,18 @@ typedef enum {
 	WAVE_SINE
 } waveform_t;
 
-
-typedef struct {
-	uint16_t frequency_dHz;
-	uint8_t amplitude;
-	waveform_t waveform;
-	uint8_t filter_value;
+typedef enum {
+	OSCILLATOR_NONE,
+	OSCILLATOR_A,
+	OSCILLATOR_B
 } oscillator_t;
 
 
-extern volatile oscillator_t OscillatorA;
-extern volatile oscillator_t OscillatorB;
+void osc_init();
 
-
-void oscillator_start(oscillator_t* osc);
-void oscillator_stop(oscillator_t* osc);
+void osc_set_waveform(oscillator_t osc, waveform_t waveform);
+void osc_set_frequency(oscillator_t osc, uint16_t frequency_dHz);
+void osc_set_amplitude(oscillator_t osc, uint8_t amplitude);
+void osc_set_filter_value(oscillator_t osc, uint8_t filter_value);
 
 #endif /* OSCILLATOR_H_ */

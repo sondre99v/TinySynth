@@ -41,21 +41,38 @@ int main(void)
 	TCD0.CMPBCLR = TIME_TIMER_PERIOD;
 	TCD0.INTCTRL = TCD_OVF_bm;
 	TCD0.CTRLA = TCD_CNTPRES_DIV32_gc | TCD_ENABLE_bm;
+	
+	PORTC.DIRSET = (1 << 1) | (1 << 3);
+	PORTC.DIRSET = (1 << 1) | (1 << 3);
+	PORTB.DIRSET = (1 << 4);
+	
+	PORTB.OUTSET = (1 << 4);
+
+
+	osc_init();
 
 	sei();
-
+	
+	//osc_set_waveform(OSCILLATOR_A, WAVE_SQUARE);
+	//osc_set_waveform(OSCILLATOR_B, WAVE_SQUARE);
+	osc_set_frequency(OSCILLATOR_A, 4400);
+	osc_set_frequency(OSCILLATOR_B, 4400);
+	
     while (1)
     {
 	    if (!(PORTB.IN & (1<<5))) {
-		    oscillator_start(&OscillatorA);
-		} else {
-			oscillator_stop(&OscillatorA);
+		    osc_set_amplitude(OSCILLATOR_A, 50);
 		}
+		else {
+			osc_set_amplitude(OSCILLATOR_A, 0);
+		}
+
 		if (!(PORTC.IN & (1<<5))) {
-			oscillator_start(&OscillatorB);
-		} else {
-			oscillator_stop(&OscillatorB);
-	    }
+			osc_set_amplitude(OSCILLATOR_B, 50);
+		}
+		else {
+			osc_set_amplitude(OSCILLATOR_B, 0);
+		}
     }
 }
 
