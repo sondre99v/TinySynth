@@ -8,6 +8,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <math.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "synth/oscillator.h"
 
@@ -20,9 +22,12 @@ volatile uint32_t time_us = 0;
 
 
 ISR(TCD0_OVF_vect) {
+	TCD0.INTFLAGS = 0x01;
+	
 	// Increment time
 	time_us += TIME_TIMER_PERIOD_US;
-	TCD0.INTFLAGS = 0x01;
+	
+	//envelope_update(TIME_TIMER_PERIOD_US);
 }
 
 void wait() {
@@ -39,7 +44,13 @@ int main(void)
 	
 	time_us = 0;
 	
-	int freqs[] = {262, 294, 330, 349, 392, 440, 494, 523};
+	int freqs[] = {
+		349, 370, 392, 415, 440, 466, 494, 523, 554, 587, 
+		622, 659, 698, 740, 784, 831, 880, 932, 988, 1047};
+	
+	uint8_t note_thresholds[] = {
+		6, 19, 32, 45, 58, 70, 83, 96, 109, 122, 
+		134, 147, 160, 173, 186, 198, 211, 224, 237, 250};
 
 	// Setup TCD0 to give low resolution (4ms) timer
 	TCD0.CMPBCLR = TIME_TIMER_PERIOD;
@@ -76,14 +87,14 @@ int main(void)
 
 	ADC0.COMMAND = ADC_STCONV_bm;
 
+	int16_t ampl = 0;
+	
+	bool fifth = false;
+	uint8_t octA = 0;
+	uint8_t octB = 0;
+
     while (1)
     {
-		while (!(ADC0.INTFLAGS & ADC_RESRDY_bm)) { }
-		volatile uint8_t adc_value = ADC0.RES;
-		ADC0.INTFLAGS = ADC_RESRDY_bm;
-		ADC0.COMMAND = ADC_STCONV_bm;
-
-		
 		// Read switch matrix
 		volatile uint16_t sw = 0;
 		
@@ -122,24 +133,61 @@ int main(void)
 			}
 		}
 
-		if (switch_index1 != -1) {
-			osc_set_frequency(OSCILLATOR_A, freqs[switch_index1 % 8] * 10 * (50UL + adc_value) / 100);
-			osc_set_frequency(OSCILLATOR_B, freqs[switch_index1 % 8] * 10);
-			osc_set_amplitude(OSCILLATOR_A, 50);
-			osc_set_amplitude(OSCILLATOR_B, 50);
-		}
-		else {
-			osc_set_amplitude(OSCILLATOR_A, 0);
-			osc_set_amplitude(OSCILLATOR_B, 0);
-		}
-		/*
-		if (switch_index2 != -1) {
-			osc_set_frequency(OSCILLATOR_B, freqs[switch_index2 % 8] * 10);
-			osc_set_amplitude(OSCILLATOR_B, 50);
-		}
-		else {
-			osc_set_amplitude(OSCILLATOR_B, 0);
+
+		// Read keyboard
+		while (!(ADC0.INTFLAGS & ADC_RESRDY_bm)) { }
+		volatile uint8_t adc_value = ADC0.RES;
+		ADC0.INTFLAGS = ADC_RESRDY_bm;
+		ADC0.COMMAND = ADC_STCONV_bm;
+		
+		/*int16_t note_index = -1;
+		
+		while(note_index < 19 && adc_value > note_thresholds[note_index + 1]) {
+			note_index++;
 		}*/
+		
+		int16_t note_index = 19;
+		while(note_index > -1 && note_thresholds[note_index] > adc_value) {
+			note_index--;
+		}
+		
+		// Set note output
+		if (note_index != -1) {
+			osc_set_frequency(OSCILLATOR_A, (freqs[note_index % 20] * (fifth ? 15 : 10)) >> octA);
+			osc_set_frequency(OSCILLATOR_B, (freqs[note_index % 20] * 10) >> octB);
+			
+			ampl = 50;
+		}
+		else {
+			ampl = 0;
+		}
+		
+		osc_set_amplitude(OSCILLATOR_A, ampl);
+		osc_set_amplitude(OSCILLATOR_B, ampl);
+		
+		
+		// Set waveform
+		switch(switch_index2) {
+			case 0: osc_set_waveform(OSCILLATOR_A, WAVE_SINE); break;
+			case 1: osc_set_waveform(OSCILLATOR_A, WAVE_SQUARE); break;
+			case 2: osc_set_waveform(OSCILLATOR_A, WAVE_SAW); break;
+			case 3: osc_set_waveform(OSCILLATOR_A, WAVE_TRIANGLE); break;
+			case 4: osc_set_waveform(OSCILLATOR_B, WAVE_SINE); break;
+			case 5: osc_set_waveform(OSCILLATOR_B, WAVE_SQUARE); break;
+			case 6: osc_set_waveform(OSCILLATOR_B, WAVE_SAW); break;
+			case 7: osc_set_waveform(OSCILLATOR_B, WAVE_TRIANGLE); break;
+		}
+		
+		switch(switch_index1) {
+			case 0: osc_set_sync(false); break;
+			case 1: osc_set_sync(true); break;
+			case 2: fifth = false; break;
+			case 3: fifth = true; break;
+			case 4: octA = 0; break;
+			case 5: octA = 1; break;
+			case 6: octB = 0; break;
+			case 7: octB = 1; break;
+		}
     }
 }
 

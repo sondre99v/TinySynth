@@ -43,7 +43,7 @@ typedef struct {
 	uint16_t timer_period;
 } osc_values_t;
 
-volatile osc_values_t OscA = {
+static volatile osc_values_t OscA = {
 	.waveform = WAVE_SINE,
 	.amplitude = 0,
 	.filter_value = 0,
@@ -61,6 +61,7 @@ static volatile osc_values_t OscB = {
 	.timer_period = 2000
 };
 
+static volatile bool sync_enabled = false;
 
 void osc_init()
 {
@@ -124,7 +125,9 @@ void osc_set_filter_value(oscillator_t osc, uint8_t filter_value)
 	
 }
 
-
+void osc_set_sync(bool enabled) {
+	sync_enabled = enabled;
+}
 
 
 // Interrupt handler for oscillator A
@@ -236,7 +239,9 @@ ISR(TCB0_INT_vect)
 		OscB.wave_index = 0;
 
 		// Sync
-		//OscA.wave_index = 0;
+		if (sync_enabled) {
+			OscA.wave_index = 0;
+		}
 	}
 	
 	TCB0.CCMP = OscB.timer_period;

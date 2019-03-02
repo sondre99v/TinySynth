@@ -11,6 +11,7 @@
 
 
 #include <stdint.h>
+#include <stdbool.h>
 
 
 typedef enum {
@@ -34,5 +35,6 @@ void osc_set_waveform(oscillator_t osc, waveform_t waveform);
 void osc_set_frequency(oscillator_t osc, uint16_t frequency_dHz);
 void osc_set_amplitude(oscillator_t osc, uint8_t amplitude);
 void osc_set_filter_value(oscillator_t osc, uint8_t filter_value);
+void osc_set_sync(bool enabled);
 
 #endif /* OSCILLATOR_H_ */
