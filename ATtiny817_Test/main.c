@@ -21,6 +21,9 @@
 volatile uint32_t time_us = 0;
 
 
+int32_t ampl = 0;
+bool note_on = false;
+
 ISR(TCD0_OVF_vect) {
 	TCD0.INTFLAGS = 0x01;
 	
@@ -28,6 +31,16 @@ ISR(TCD0_OVF_vect) {
 	time_us += TIME_TIMER_PERIOD_US;
 	
 	//envelope_update(TIME_TIMER_PERIOD_US);
+	
+	if(!note_on && ampl > 0) {
+		ampl -= 200;
+		if (ampl < 0) {
+			ampl = 0;
+		}
+	}
+	
+	osc_set_amplitude(OSCILLATOR_A, ampl);
+	osc_set_amplitude(OSCILLATOR_B, ampl);
 }
 
 void wait() {
@@ -45,8 +58,9 @@ int main(void)
 	time_us = 0;
 	
 	int freqs[] = {
-		349, 370, 392, 415, 440, 466, 494, 523, 554, 587, 
-		622, 659, 698, 740, 784, 831, 880, 932, 988, 1047};
+		1746, 1850, 1960, 2077, 2200, 2331, 2469, 2616, 2772, 2937, 
+		3111, 3296, 3492, 3700, 3920, 4153, 4400, 4662, 4939, 5233
+	};
 	
 	uint8_t note_thresholds[] = {
 		6, 19, 32, 45, 58, 70, 83, 96, 109, 122, 
@@ -87,8 +101,6 @@ int main(void)
 
 	ADC0.COMMAND = ADC_STCONV_bm;
 
-	int16_t ampl = 0;
-	
 	bool fifth = false;
 	uint8_t octA = 0;
 	uint8_t octB = 0;
@@ -153,17 +165,14 @@ int main(void)
 		
 		// Set note output
 		if (note_index != -1) {
-			osc_set_frequency(OSCILLATOR_A, (freqs[note_index % 20] * (fifth ? 15 : 10)) >> octA);
-			osc_set_frequency(OSCILLATOR_B, (freqs[note_index % 20] * 10) >> octB);
+			osc_set_frequency(OSCILLATOR_A, (freqs[note_index % 20] + (fifth ? (freqs[note_index % 20] >> 1) : 0)) >> octA);
+			osc_set_frequency(OSCILLATOR_B, (freqs[note_index % 20]) >> octB);
 			
-			ampl = 50;
+			note_on = true;
+			ampl = 65535;
+		} else {
+			note_on = false;
 		}
-		else {
-			ampl = 0;
-		}
-		
-		osc_set_amplitude(OSCILLATOR_A, ampl);
-		osc_set_amplitude(OSCILLATOR_B, ampl);
 		
 		
 		// Set waveform
