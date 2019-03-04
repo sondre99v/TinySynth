@@ -169,7 +169,7 @@ int main(void)
 			osc_set_frequency(OSCILLATOR_B, (freqs[note_index % 20]) >> octB);
 			
 			note_on = true;
-			ampl = 65535;
+			ampl = 0x1000;
 		} else {
 			note_on = false;
 		}

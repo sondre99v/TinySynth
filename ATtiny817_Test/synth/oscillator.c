@@ -12,9 +12,8 @@
 
 #define SAMPLES_PR_WAVE 32
 #define MAIN_CLOCK_FREQUENCY_HZ 19726000ULL
-#define DAC_REST_VALUE 0x80
-#define DAC_MIN_VALUE 0x20
-#define DAC_MAX_VALUE 0xDF
+#define MAX_SAMPLE 0xFFFF
+#define MIN_SAMPLE 0x0000
 
 
 static const int16_t wave_squ[SAMPLES_PR_WAVE] = {
@@ -43,7 +42,7 @@ typedef struct {
 	waveform_t waveform;
 	uint16_t amplitude;
 	uint8_t filter_value;
-	int16_t prev_sample;
+	int16_t current_sample;
 	uint8_t wave_index;
 	uint16_t timer_period;
 } osc_values_t;
@@ -52,7 +51,7 @@ static volatile osc_values_t OscA = {
 	.waveform = WAVE_SINE,
 	.amplitude = 0,
 	.filter_value = 0,
-	.prev_sample = 0,
+	.current_sample = 0,
 	.wave_index = 0,
 	.timer_period = 2000
 };
@@ -61,7 +60,7 @@ static volatile osc_values_t OscB = {
 	.waveform = WAVE_SINE,
 	.amplitude = 0,
 	.filter_value = 0,
-	.prev_sample = 0,
+	.current_sample = 0,
 	.wave_index = 0,
 	.timer_period = 2000
 };
@@ -78,7 +77,7 @@ void osc_init()
 	DAC0.CTRLA = DAC_OUTEN_bm | DAC_ENABLE_bm;
 	
 	// Set output to resting value
-	DAC0.DATA = DAC_REST_VALUE;
+	DAC0.DATA = 128;
 	
 	// Enable the oscillators
 	TCA0.SINGLE.PERBUF = OscA.timer_period;
@@ -135,6 +134,53 @@ void osc_set_sync(bool enabled) {
 	sync_enabled = enabled;
 }
 
+static void run_oscillator(volatile osc_values_t* osc) {
+	// Compute next sample value
+	volatile int16_t wave_sample;
+
+	switch(osc->waveform) {
+		case WAVE_SAW:
+		wave_sample = wave_saw[osc->wave_index];
+		break;
+		case WAVE_TRIANGLE:
+		wave_sample = wave_tri[osc->wave_index];
+		break;
+		case WAVE_SQUARE:
+		wave_sample = wave_squ[osc->wave_index];
+		break;
+		case WAVE_SINE:
+		wave_sample = wave_sin[osc->wave_index];
+		break;
+		default:
+		wave_sample = 0;
+		break;
+	}
+	
+	osc->current_sample = (((int32_t)osc->amplitude + 1) * wave_sample + 0x8000) >> 16;
+	
+	volatile int32_t new_data = (int32_t)OscA.current_sample + OscB.current_sample;
+	
+	if (new_data > MAX_SAMPLE) {
+		new_data = MAX_SAMPLE;
+	}
+	else if (new_data < MIN_SAMPLE) {
+		new_data = MIN_SAMPLE;
+	}
+	
+	DAC0.DATA = 128 + ((new_data + 0x80) >> 8);
+	
+	
+	// Compute current location within wave period
+	osc->wave_index++;
+	if (osc->wave_index >= SAMPLES_PR_WAVE) {
+		osc->wave_index = 0;
+		
+		// Sync
+		if (sync_enabled && osc == &OscB) {
+			OscA.wave_index = 0;
+		}
+	}
+}
 
 // Interrupt handler for oscillator A
 ISR(TCA0_OVF_vect)
@@ -142,70 +188,13 @@ ISR(TCA0_OVF_vect)
 	// Clear interrupt flag
 	TCA0.SINGLE.INTFLAGS = TCA_SINGLE_OVF_bm;
 	
-	// Compute next sample value
-	volatile int16_t sample;
-
-	switch(OscA.waveform) {
-		case WAVE_SAW: 
-			sample = wave_saw[OscA.wave_index];
-			break;
-		case WAVE_TRIANGLE: 
-			sample = wave_tri[OscA.wave_index];
-			break;
-		case WAVE_SQUARE: 
-			sample = wave_squ[OscA.wave_index];
-			break;
-		case WAVE_SINE: 
-			sample = wave_sin[OscA.wave_index];
-			break;
-		default:
-			sample = 0;
-			break;
-	}
-	
-	sample = (((int32_t)OscA.amplitude + 1) * sample + 0x8000) / 65536;
-	
-	volatile int32_t change = sample - OscA.prev_sample;
-	volatile int32_t new_data = (int32_t)current_DAC_data + change;
-	
-	if (new_data > INT16_MAX) {
-		change -= new_data - INT16_MAX;
-	}
-	else if (new_data < INT16_MIN) {
-		change += INT16_MIN - new_data;
-	}
-	
-	OscA.prev_sample += change;
-	current_DAC_data += change;
-	DAC0.DATA = 128 + ((current_DAC_data + 0x80) >> 8);
-	
-	// Write output value
-	/*volatile int32_t change = sample - OscA.prev_sample;
-	volatile int16_t current_data = (int16_t)(DAC0.DATA);
-	volatile int16_t new_data = current_data + change;
-
-	if (new_data > DAC_MAX_VALUE) {
-		change -= new_data - DAC_MAX_VALUE;
-	}
-	else if (new_data < DAC_MIN_VALUE) {
-		change += DAC_MIN_VALUE - new_data;
-	}
-
-	OscA.prev_sample += change;
-	DAC0.DATA += change;*/
-	
-	// Compute current location within wave period
-	OscA.wave_index++;
-	if (OscA.wave_index >= SAMPLES_PR_WAVE) {
-		OscA.wave_index = 0;
-	}
+	run_oscillator(&OscA);
 	
 	TCA0.SINGLE.PER = OscA.timer_period;
 
 	// Check for timing violation
 	if (TCA0.SINGLE.CNT > TCA0.SINGLE.PER / 2) {
 		PORTB.OUTCLR = (1 << 4);
-	} else {
 	}
 }
 
@@ -215,68 +204,7 @@ ISR(TCB0_INT_vect)
 	// Clear interrupt flag
 	TCB0.INTFLAGS = TCB_CAPT_bm;
 	
-	// Compute next sample value
-	volatile int16_t sample;
-
-	switch(OscB.waveform) {
-		case WAVE_SAW:
-			sample = wave_saw[OscB.wave_index];
-			break;
-		case WAVE_TRIANGLE:
-			sample = wave_tri[OscB.wave_index];
-			break;
-		case WAVE_SQUARE:
-			sample = wave_squ[OscB.wave_index];
-			break;
-		case WAVE_SINE:
-			sample = wave_sin[OscB.wave_index];
-			break;
-		default:
-			sample = 0;
-			break;
-	}
-	
-	sample = (((int32_t)OscB.amplitude + 1) * sample + 0x8000) / 65536;
-	
-	volatile int32_t change = sample - OscB.prev_sample;
-	volatile int32_t new_data = (int32_t)current_DAC_data + change;
-	
-	if (new_data > INT16_MAX) {
-		change -= new_data - INT16_MAX;
-	}
-	else if (new_data < INT16_MIN) {
-		change += INT16_MIN - new_data;
-	}
-	
-	OscB.prev_sample += change;
-	current_DAC_data += change;
-	DAC0.DATA = 128 + ((current_DAC_data + 0x80) >> 8);
-	
-	/*// Write output value
-	volatile int32_t change = sample - OscB.prev_sample;
-	volatile int16_t current_data = (int16_t)(DAC0.DATA);
-	volatile int16_t new_data = current_data + change;
-
-	if (new_data > DAC_MAX_VALUE) {
-		change -= new_data - DAC_MAX_VALUE;
-	}
-	else if (new_data < DAC_MIN_VALUE) {
-		change += DAC_MIN_VALUE - new_data;
-	}
-
-	OscB.prev_sample += change;
-	DAC0.DATA += change;*/
-	
-	// Compute current location within wave period
-	OscB.wave_index++;
-	if (OscB.wave_index == SAMPLES_PR_WAVE) {
-		OscB.wave_index = 0;
-
-		// Sync
-		if (sync_enabled) {
-			OscA.wave_index = 0;
-		}
-	}
+	run_oscillator(&OscB);
 	
 	TCB0.CCMP = OscB.timer_period;
 
