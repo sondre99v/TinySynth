@@ -167,7 +167,7 @@ static void run_oscillator(volatile osc_values_t* osc) {
 		new_data = MIN_SAMPLE;
 	}
 	
-	DAC0.DATA = 128 + ((new_data + 0x80) >> 8);
+	DAC0.DATA = (uint8_t)(0x80 + ((new_data + 0x0080) >> 8));
 	
 	
 	// Compute current location within wave period

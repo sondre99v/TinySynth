@@ -39,8 +39,8 @@ ISR(TCD0_OVF_vect) {
 		}
 	}
 	
-	osc_set_amplitude(OSCILLATOR_A, ampl);
-	osc_set_amplitude(OSCILLATOR_B, ampl);
+	///osc_set_amplitude(OSCILLATOR_A, ampl);
+	//osc_set_amplitude(OSCILLATOR_B, ampl);
 }
 
 void wait() {
@@ -170,8 +170,12 @@ int main(void)
 			
 			note_on = true;
 			ampl = 0x1000;
+			osc_set_amplitude(OSCILLATOR_A, 0x4000);
+			osc_set_amplitude(OSCILLATOR_B, 0x4000);
 		} else {
 			note_on = false;
+			osc_set_amplitude(OSCILLATOR_A, 0x0000);
+			osc_set_amplitude(OSCILLATOR_B, 0x0000);
 		}
 		
 		
