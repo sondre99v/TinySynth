@@ -1,0 +1,957 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="D">
+  <design>
+    <source>G:\Dropbox\NTNU\Omega Verksted\TinySynth\BusinessSynth\BusinessSynth\BusinessSynth.sch</source>
+    <date>2019-04-06 16:51:21</date>
+    <tool>Eeschema (5.1.0)-1</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>BusinessSynth</title>
+        <company/>
+        <rev>1.0</rev>
+        <date>2019-03-19</date>
+        <source>BusinessSynth.sch</source>
+        <comment number="1" value=""/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="R1">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA247D4</tstamp>
+    </comp>
+    <comp ref="R2">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA25A7C</tstamp>
+    </comp>
+    <comp ref="R4">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA25E30</tstamp>
+    </comp>
+    <comp ref="R6">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA261B0</tstamp>
+    </comp>
+    <comp ref="R8">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA26441</tstamp>
+    </comp>
+    <comp ref="R9">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA29B8A</tstamp>
+    </comp>
+    <comp ref="R11">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA29E46</tstamp>
+    </comp>
+    <comp ref="R13">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA2A165</tstamp>
+    </comp>
+    <comp ref="R14">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA2A378</tstamp>
+    </comp>
+    <comp ref="R16">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA2A6ED</tstamp>
+    </comp>
+    <comp ref="R18">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA2AA31</tstamp>
+    </comp>
+    <comp ref="R20">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA2AC61</tstamp>
+    </comp>
+    <comp ref="R3">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA2AF6D</tstamp>
+    </comp>
+    <comp ref="R5">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA2B34C</tstamp>
+    </comp>
+    <comp ref="R7">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA2B54F</tstamp>
+    </comp>
+    <comp ref="R10">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA2B7AE</tstamp>
+    </comp>
+    <comp ref="R12">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA2BEE8</tstamp>
+    </comp>
+    <comp ref="R15">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA2C273</tstamp>
+    </comp>
+    <comp ref="R17">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA2C725</tstamp>
+    </comp>
+    <comp ref="R19">
+      <value>100R</value>
+      <footprint>BusinessSynth:R_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA2CA7F</tstamp>
+    </comp>
+    <comp ref="BT1">
+      <value>Battery_Cell</value>
+      <footprint>BusinessSynth:BatteryHolderPCB_CR20xx</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="Battery_Cell" description="Single-cell battery"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CABADC7</tstamp>
+    </comp>
+    <comp ref="U1">
+      <value>ATtiny817-M</value>
+      <footprint>BusinessSynth:QFN-24-1EP_4x4mm_P0.5mm_EP2.6x2.6mm_nosilk</footprint>
+      <datasheet>http://ww1.microchip.com/downloads/en/DeviceDoc/40001901B.pdf</datasheet>
+      <libsource lib="MCU_Microchip_ATtiny" part="ATtiny817-M" description="20MHz, 8kB Flash, 512B SRAM, 128B EEPROM, VQFN-24"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5C90E530</tstamp>
+    </comp>
+    <comp ref="C1">
+      <value>100nF</value>
+      <footprint>Capacitor_SMD:C_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5C90F321</tstamp>
+    </comp>
+    <comp ref="R21">
+      <value>1K8</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA2F499</tstamp>
+    </comp>
+    <comp ref="U2">
+      <value>IS31AP4991A</value>
+      <footprint>BusinessSynth:SOP-8_3.76x4.96mm_P1.27mm_nosilk</footprint>
+      <libsource lib="BusinessSynth" part="IS31AP4991A" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA81333</tstamp>
+    </comp>
+    <comp ref="R23">
+      <value>20K</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA82711</tstamp>
+    </comp>
+    <comp ref="C4">
+      <value>100nF</value>
+      <footprint>Capacitor_SMD:C_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA82D92</tstamp>
+    </comp>
+    <comp ref="C3">
+      <value>1µF</value>
+      <footprint>Capacitor_SMD:C_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA83C51</tstamp>
+    </comp>
+    <comp ref="C5">
+      <value>0.47µF</value>
+      <footprint>Capacitor_SMD:C_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA8478D</tstamp>
+    </comp>
+    <comp ref="R22">
+      <value>20K</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA8D370</tstamp>
+    </comp>
+    <comp ref="C2">
+      <value>Cfb</value>
+      <footprint>Capacitor_SMD:C_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA8DE55</tstamp>
+    </comp>
+    <comp ref="C6">
+      <value>Cf_lp</value>
+      <footprint>Capacitor_SMD:C_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CAD22DA</tstamp>
+    </comp>
+    <comp ref="R24">
+      <value>Rf_lp</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CAD260C</tstamp>
+    </comp>
+    <comp ref="LS1">
+      <value>Speaker</value>
+      <footprint>BusinessSynth:CDMG13008L-02</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="Speaker" description="Speaker"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CB2354B</tstamp>
+    </comp>
+    <comp ref="LS2">
+      <value>Speaker</value>
+      <footprint>BusinessSynth:CDMG13008L-02</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="Speaker" description="Speaker"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CB23F6A</tstamp>
+    </comp>
+    <comp ref="R25">
+      <value>0R</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CB5B37B</tstamp>
+    </comp>
+    <comp ref="J2">
+      <value>StylusKey</value>
+      <footprint>BusinessSynth:StylusKey</footprint>
+      <libsource lib="BusinessSynth" part="StylusKey" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA42FAB</tstamp>
+    </comp>
+    <comp ref="J3">
+      <value>StylusKey</value>
+      <footprint>BusinessSynth:StylusKey</footprint>
+      <libsource lib="BusinessSynth" part="StylusKey" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA43D34</tstamp>
+    </comp>
+    <comp ref="J4">
+      <value>StylusKey</value>
+      <footprint>BusinessSynth:StylusKey</footprint>
+      <libsource lib="BusinessSynth" part="StylusKey" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA43EE7</tstamp>
+    </comp>
+    <comp ref="J5">
+      <value>StylusKey</value>
+      <footprint>BusinessSynth:StylusKey</footprint>
+      <libsource lib="BusinessSynth" part="StylusKey" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA4407D</tstamp>
+    </comp>
+    <comp ref="J6">
+      <value>StylusKey</value>
+      <footprint>BusinessSynth:StylusKey</footprint>
+      <libsource lib="BusinessSynth" part="StylusKey" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA44213</tstamp>
+    </comp>
+    <comp ref="J7">
+      <value>StylusKey</value>
+      <footprint>BusinessSynth:StylusKey</footprint>
+      <libsource lib="BusinessSynth" part="StylusKey" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA44360</tstamp>
+    </comp>
+    <comp ref="J8">
+      <value>StylusKey</value>
+      <footprint>BusinessSynth:StylusKey</footprint>
+      <libsource lib="BusinessSynth" part="StylusKey" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA4458E</tstamp>
+    </comp>
+    <comp ref="J9">
+      <value>StylusKey</value>
+      <footprint>BusinessSynth:StylusKey</footprint>
+      <libsource lib="BusinessSynth" part="StylusKey" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA44789</tstamp>
+    </comp>
+    <comp ref="R26">
+      <value>330R</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA7854C</tstamp>
+    </comp>
+    <comp ref="R27">
+      <value>330R</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA7915F</tstamp>
+    </comp>
+    <comp ref="R28">
+      <value>330R</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA8BFF5</tstamp>
+    </comp>
+    <comp ref="R29">
+      <value>330R</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CA8BFFB</tstamp>
+    </comp>
+    <comp ref="R30">
+      <value>330R</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CAA7D7A</tstamp>
+    </comp>
+    <comp ref="R31">
+      <value>330R</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CAA7D80</tstamp>
+    </comp>
+    <comp ref="R32">
+      <value>330R</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CAB1030</tstamp>
+    </comp>
+    <comp ref="R33">
+      <value>330R</value>
+      <footprint>Resistor_SMD:R_0402_1005Metric</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CAB1036</tstamp>
+    </comp>
+    <comp ref="J1">
+      <value>StylusKey</value>
+      <footprint>BusinessSynth:StylusKey</footprint>
+      <libsource lib="BusinessSynth" part="StylusKey" description=""/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CABA3B5</tstamp>
+    </comp>
+    <comp ref="D1">
+      <value>LED</value>
+      <footprint>BusinessSynth:LED_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CC681CC</tstamp>
+    </comp>
+    <comp ref="D8">
+      <value>LED</value>
+      <footprint>BusinessSynth:LED_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CD35C12</tstamp>
+    </comp>
+    <comp ref="D7">
+      <value>LED</value>
+      <footprint>BusinessSynth:LED_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CD359F8</tstamp>
+    </comp>
+    <comp ref="D6">
+      <value>LED</value>
+      <footprint>BusinessSynth:LED_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CD357F1</tstamp>
+    </comp>
+    <comp ref="D5">
+      <value>LED</value>
+      <footprint>BusinessSynth:LED_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CD355CD</tstamp>
+    </comp>
+    <comp ref="D4">
+      <value>LED</value>
+      <footprint>BusinessSynth:LED_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CC6AD8D</tstamp>
+    </comp>
+    <comp ref="D3">
+      <value>LED</value>
+      <footprint>BusinessSynth:LED_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CC6AB4A</tstamp>
+    </comp>
+    <comp ref="D2">
+      <value>LED</value>
+      <footprint>BusinessSynth:LED_0603_1608Metric_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CC6A8C2</tstamp>
+    </comp>
+    <comp ref="Q2">
+      <value>Q_PNP_BEC</value>
+      <footprint>BusinessSynth:SOT-323_SC-70_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="Q_PNP_BEC" description="PNP transistor, base/emitter/collector"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CE2D45B</tstamp>
+    </comp>
+    <comp ref="Q1">
+      <value>Q_PNP_BEC</value>
+      <footprint>BusinessSynth:SOT-323_SC-70_nosilk</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="Q_PNP_BEC" description="PNP transistor, base/emitter/collector"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5CE2E126</tstamp>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="BusinessSynth" part="IS31AP4991A">
+      <fields>
+        <field name="Reference">U?</field>
+        <field name="Value">IS31AP4991A</field>
+        <field name="Footprint">Package_SO:SOP-8_3.76x4.96mm_P1.27mm</field>
+      </fields>
+      <pins>
+        <pin num="1" name="SDB" type="input"/>
+        <pin num="2" name="BYPASS" type="input"/>
+        <pin num="3" name="IN+" type="input"/>
+        <pin num="4" name="IN-" type="input"/>
+        <pin num="5" name="OUT-" type="output"/>
+        <pin num="6" name="VCC" type="power_in"/>
+        <pin num="7" name="GND" type="power_in"/>
+        <pin num="8" name="OUT+" type="output"/>
+      </pins>
+    </libpart>
+    <libpart lib="BusinessSynth" part="StylusKey">
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">StylusKey</field>
+        <field name="Footprint">BusinessSynth:StylusKey</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="output"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="Battery_Cell">
+      <description>Single-cell battery</description>
+      <docs>~</docs>
+      <fields>
+        <field name="Reference">BT</field>
+        <field name="Value">Battery_Cell</field>
+      </fields>
+      <pins>
+        <pin num="1" name="+" type="passive"/>
+        <pin num="2" name="-" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="C">
+      <description>Unpolarized capacitor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="LED">
+      <description>Light emitting diode</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>LED*</fp>
+        <fp>LED_SMD:*</fp>
+        <fp>LED_THT:*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">LED</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="Q_PNP_BEC">
+      <description>PNP transistor, base/emitter/collector</description>
+      <docs>~</docs>
+      <fields>
+        <field name="Reference">Q</field>
+        <field name="Value">Q_PNP_BEC</field>
+      </fields>
+      <pins>
+        <pin num="1" name="B" type="input"/>
+        <pin num="2" name="E" type="passive"/>
+        <pin num="3" name="C" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R">
+      <description>Resistor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="Speaker">
+      <description>Speaker</description>
+      <docs>~</docs>
+      <fields>
+        <field name="Reference">LS</field>
+        <field name="Value">Speaker</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="input"/>
+        <pin num="2" name="2" type="input"/>
+      </pins>
+    </libpart>
+    <libpart lib="MCU_Microchip_ATtiny" part="ATtiny807-M">
+      <aliases>
+        <alias>ATtiny1607-M</alias>
+        <alias>ATtiny417-M</alias>
+        <alias>ATtiny817-M</alias>
+        <alias>ATtiny1617-M</alias>
+        <alias>ATtiny3217-M</alias>
+      </aliases>
+      <description>20MHz, 8kB Flash, 512B SRAM, 128B EEPROM, VQFN-24</description>
+      <docs>http://ww1.microchip.com/downloads/en/DeviceDoc/ATtiny807_1607-Data-Sheet-40002030A.pdf</docs>
+      <footprints>
+        <fp>QFN*1EP*4x4mm*P0.5mm*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">ATtiny807-M</field>
+        <field name="Footprint">Package_DFN_QFN:QFN-24-1EP_4x4mm_P0.5mm_EP2.6x2.6mm</field>
+      </fields>
+      <pins>
+        <pin num="1" name="PA2" type="3state"/>
+        <pin num="2" name="PA3" type="3state"/>
+        <pin num="3" name="GND" type="power_in"/>
+        <pin num="4" name="VCC" type="power_in"/>
+        <pin num="5" name="PA4" type="3state"/>
+        <pin num="6" name="PA5" type="3state"/>
+        <pin num="7" name="PA6" type="3state"/>
+        <pin num="8" name="PA7" type="3state"/>
+        <pin num="9" name="PB7" type="3state"/>
+        <pin num="10" name="PB6" type="3state"/>
+        <pin num="11" name="PB5" type="3state"/>
+        <pin num="12" name="PB4" type="3state"/>
+        <pin num="13" name="PB3" type="3state"/>
+        <pin num="14" name="PB2" type="3state"/>
+        <pin num="15" name="PB1" type="3state"/>
+        <pin num="16" name="PB0" type="3state"/>
+        <pin num="17" name="PC0" type="3state"/>
+        <pin num="18" name="PC1" type="3state"/>
+        <pin num="19" name="PC2" type="3state"/>
+        <pin num="20" name="PC3" type="3state"/>
+        <pin num="21" name="PC4" type="3state"/>
+        <pin num="22" name="PC5" type="3state"/>
+        <pin num="23" name="~RESET~/PA0" type="3state"/>
+        <pin num="24" name="PA1" type="3state"/>
+        <pin num="25" name="GND" type="passive"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="BusinessSynth">
+      <uri>G:\Dropbox\NTNU\Omega Verksted\TinySynth\BusinessSynth\BusinessSynth/BusinessSynth.lib</uri>
+    </library>
+    <library logical="Device">
+      <uri>C:\Program Files\KiCad\share\kicad\library/Device.lib</uri>
+    </library>
+    <library logical="MCU_Microchip_ATtiny">
+      <uri>C:\Program Files\KiCad\share\kicad\library/MCU_Microchip_ATtiny.lib</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="Net-(LS1-Pad2)">
+      <node ref="LS2" pin="1"/>
+      <node ref="LS1" pin="2"/>
+    </net>
+    <net code="2" name="Net-(J3-Pad1)">
+      <node ref="J3" pin="1"/>
+      <node ref="U1" pin="15"/>
+    </net>
+    <net code="3" name="Net-(R25-Pad2)">
+      <node ref="R25" pin="2"/>
+      <node ref="U2" pin="1"/>
+    </net>
+    <net code="4" name="VDD">
+      <node ref="D5" pin="2"/>
+      <node ref="D4" pin="2"/>
+      <node ref="D3" pin="2"/>
+      <node ref="C3" pin="1"/>
+      <node ref="Q1" pin="2"/>
+      <node ref="U2" pin="6"/>
+      <node ref="D2" pin="2"/>
+      <node ref="Q2" pin="2"/>
+      <node ref="BT1" pin="1"/>
+      <node ref="D1" pin="2"/>
+      <node ref="D8" pin="2"/>
+      <node ref="D6" pin="2"/>
+      <node ref="R25" pin="1"/>
+      <node ref="C1" pin="1"/>
+      <node ref="D7" pin="2"/>
+      <node ref="U1" pin="4"/>
+    </net>
+    <net code="5" name="Net-(C2-Pad1)">
+      <node ref="U2" pin="5"/>
+      <node ref="LS2" pin="2"/>
+      <node ref="R22" pin="2"/>
+      <node ref="C2" pin="1"/>
+    </net>
+    <net code="6" name="Net-(J5-Pad1)">
+      <node ref="U1" pin="13"/>
+      <node ref="J5" pin="1"/>
+    </net>
+    <net code="7" name="GND">
+      <node ref="U2" pin="7"/>
+      <node ref="C1" pin="2"/>
+      <node ref="R20" pin="2"/>
+      <node ref="U1" pin="3"/>
+      <node ref="U1" pin="25"/>
+      <node ref="BT1" pin="2"/>
+      <node ref="C3" pin="2"/>
+      <node ref="R21" pin="2"/>
+      <node ref="C6" pin="2"/>
+      <node ref="C5" pin="2"/>
+    </net>
+    <net code="8" name="Net-(C4-Pad2)">
+      <node ref="C4" pin="2"/>
+      <node ref="C6" pin="1"/>
+      <node ref="R24" pin="2"/>
+    </net>
+    <net code="9" name="Net-(J4-Pad1)">
+      <node ref="J4" pin="1"/>
+      <node ref="U1" pin="14"/>
+    </net>
+    <net code="10" name="Net-(J9-Pad1)">
+      <node ref="U1" pin="9"/>
+      <node ref="J9" pin="1"/>
+    </net>
+    <net code="11" name="Net-(J8-Pad1)">
+      <node ref="U1" pin="10"/>
+      <node ref="J8" pin="1"/>
+    </net>
+    <net code="12" name="Net-(J7-Pad1)">
+      <node ref="U1" pin="11"/>
+      <node ref="J7" pin="1"/>
+    </net>
+    <net code="13" name="Net-(J6-Pad1)">
+      <node ref="J6" pin="1"/>
+      <node ref="U1" pin="12"/>
+    </net>
+    <net code="14" name="Net-(J2-Pad1)">
+      <node ref="U1" pin="16"/>
+      <node ref="J2" pin="1"/>
+    </net>
+    <net code="15" name="Net-(C2-Pad2)">
+      <node ref="R22" pin="1"/>
+      <node ref="C2" pin="2"/>
+      <node ref="R23" pin="2"/>
+      <node ref="U2" pin="4"/>
+    </net>
+    <net code="16" name="Net-(C4-Pad1)">
+      <node ref="C4" pin="1"/>
+      <node ref="R23" pin="1"/>
+    </net>
+    <net code="17" name="Net-(LS1-Pad1)">
+      <node ref="U2" pin="8"/>
+      <node ref="LS1" pin="1"/>
+    </net>
+    <net code="18" name="Net-(C5-Pad1)">
+      <node ref="U2" pin="3"/>
+      <node ref="C5" pin="1"/>
+      <node ref="U2" pin="2"/>
+    </net>
+    <net code="19" name="Net-(U1-Pad6)">
+      <node ref="U1" pin="6"/>
+    </net>
+    <net code="20" name="Net-(D7-Pad1)">
+      <node ref="D7" pin="1"/>
+      <node ref="R32" pin="2"/>
+    </net>
+    <net code="21" name="Net-(D8-Pad1)">
+      <node ref="R33" pin="2"/>
+      <node ref="D8" pin="1"/>
+    </net>
+    <net code="22" name="Net-(D1-Pad1)">
+      <node ref="R26" pin="2"/>
+      <node ref="D1" pin="1"/>
+    </net>
+    <net code="23" name="Net-(U1-Pad8)">
+      <node ref="U1" pin="8"/>
+    </net>
+    <net code="24" name="Net-(U1-Pad5)">
+      <node ref="U1" pin="5"/>
+    </net>
+    <net code="25" name="/Led8">
+      <node ref="U1" pin="1"/>
+      <node ref="R33" pin="1"/>
+    </net>
+    <net code="26" name="/Led7">
+      <node ref="R32" pin="1"/>
+      <node ref="U1" pin="24"/>
+    </net>
+    <net code="27" name="/Led6">
+      <node ref="U1" pin="22"/>
+      <node ref="R31" pin="1"/>
+    </net>
+    <net code="28" name="/Led5">
+      <node ref="R30" pin="1"/>
+      <node ref="U1" pin="21"/>
+    </net>
+    <net code="29" name="/Led4">
+      <node ref="R29" pin="1"/>
+      <node ref="U1" pin="20"/>
+    </net>
+    <net code="30" name="/Led3">
+      <node ref="U1" pin="19"/>
+      <node ref="R28" pin="1"/>
+    </net>
+    <net code="31" name="/Led2">
+      <node ref="R27" pin="1"/>
+      <node ref="U1" pin="18"/>
+    </net>
+    <net code="32" name="/Led1">
+      <node ref="R26" pin="1"/>
+      <node ref="U1" pin="17"/>
+    </net>
+    <net code="33" name="Net-(Q1-Pad1)">
+      <node ref="Q2" pin="1"/>
+      <node ref="Q1" pin="3"/>
+      <node ref="Q1" pin="1"/>
+      <node ref="R21" pin="1"/>
+    </net>
+    <net code="34" name="Net-(D2-Pad1)">
+      <node ref="D2" pin="1"/>
+      <node ref="R27" pin="2"/>
+    </net>
+    <net code="35" name="Net-(D3-Pad1)">
+      <node ref="D3" pin="1"/>
+      <node ref="R28" pin="2"/>
+    </net>
+    <net code="36" name="Net-(D4-Pad1)">
+      <node ref="R29" pin="2"/>
+      <node ref="D4" pin="1"/>
+    </net>
+    <net code="37" name="Net-(D6-Pad1)">
+      <node ref="D6" pin="1"/>
+      <node ref="R31" pin="2"/>
+    </net>
+    <net code="38" name="Net-(D5-Pad1)">
+      <node ref="D5" pin="1"/>
+      <node ref="R30" pin="2"/>
+    </net>
+    <net code="39" name="Net-(J1-Pad1)">
+      <node ref="U1" pin="23"/>
+      <node ref="J1" pin="1"/>
+    </net>
+    <net code="40" name="/AudioOut">
+      <node ref="R24" pin="1"/>
+      <node ref="U1" pin="7"/>
+    </net>
+    <net code="42" name="/KeyB2">
+      <node ref="R1" pin="2"/>
+      <node ref="R2" pin="1"/>
+    </net>
+    <net code="43" name="/KeyC3">
+      <node ref="Q2" pin="3"/>
+      <node ref="U1" pin="2"/>
+      <node ref="R1" pin="1"/>
+    </net>
+    <net code="44" name="/KeyBb2">
+      <node ref="R2" pin="2"/>
+      <node ref="R3" pin="1"/>
+    </net>
+    <net code="45" name="/KeyA1">
+      <node ref="R15" pin="2"/>
+      <node ref="R16" pin="1"/>
+    </net>
+    <net code="46" name="/KeyF1">
+      <node ref="R20" pin="1"/>
+      <node ref="R19" pin="2"/>
+    </net>
+    <net code="47" name="/KeyGb1">
+      <node ref="R18" pin="2"/>
+      <node ref="R19" pin="1"/>
+    </net>
+    <net code="48" name="/KeyG1">
+      <node ref="R18" pin="1"/>
+      <node ref="R17" pin="2"/>
+    </net>
+    <net code="49" name="/KeyAb1">
+      <node ref="R16" pin="2"/>
+      <node ref="R17" pin="1"/>
+    </net>
+    <net code="50" name="/KeyBb1">
+      <node ref="R14" pin="2"/>
+      <node ref="R15" pin="1"/>
+    </net>
+    <net code="51" name="/KeyB1">
+      <node ref="R13" pin="2"/>
+      <node ref="R14" pin="1"/>
+    </net>
+    <net code="52" name="/KeyC2">
+      <node ref="R13" pin="1"/>
+      <node ref="R12" pin="2"/>
+    </net>
+    <net code="53" name="/KeyDb2">
+      <node ref="R11" pin="2"/>
+      <node ref="R12" pin="1"/>
+    </net>
+    <net code="54" name="/KeyD2">
+      <node ref="R11" pin="1"/>
+      <node ref="R10" pin="2"/>
+    </net>
+    <net code="55" name="/KeyEb2">
+      <node ref="R10" pin="1"/>
+      <node ref="R9" pin="2"/>
+    </net>
+    <net code="56" name="/KeyE2">
+      <node ref="R9" pin="1"/>
+      <node ref="R8" pin="2"/>
+    </net>
+    <net code="57" name="/KeyF2">
+      <node ref="R7" pin="2"/>
+      <node ref="R8" pin="1"/>
+    </net>
+    <net code="58" name="/KeyGb2">
+      <node ref="R6" pin="2"/>
+      <node ref="R7" pin="1"/>
+    </net>
+    <net code="59" name="/KeyG2">
+      <node ref="R5" pin="2"/>
+      <node ref="R6" pin="1"/>
+    </net>
+    <net code="60" name="/KeyAb2">
+      <node ref="R4" pin="2"/>
+      <node ref="R5" pin="1"/>
+    </net>
+    <net code="61" name="/KeyA2">
+      <node ref="R4" pin="1"/>
+      <node ref="R3" pin="2"/>
+    </net>
+  </nets>
+</export>
