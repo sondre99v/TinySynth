@@ -1,6 +1,8 @@
 # TinySynth
 A business card with a digital synthesizer, built with the [ATtiny817](https://www.microchip.com/wwwproducts/en/ATTINY817) microcontroller.
 
+<img src="./Doc/Images/PCB_Front.jpg" alt="Revision 1" height="150"/><img src="./Doc/Images/PCB_Back.jpg" alt="Revision 1" height="150"/>
+
 ## Features
 The business card features my name, contact information, and a digital synthesizer with integrated speakers and keyboard. To use the synthesizer, insert a suitable 3V coin cell battery (CR2016 or CR2032 works), and break off the stylus on the right side of the card. The stylus can then be used to play the keyboard, or to configure the synthesizer with the buttons above the keys.
 
@@ -28,5 +30,9 @@ The third and current revision is similar to the second design, but it replaces 
 ### Speakers
 The speakers are very thin speakers which I believe is intended to be used in earbuds. They are connected in series, and driven using a speaker-driver amplifying the filtered output signal from the DAC in the microcontroller.
 
+<img src="./Doc/Images/AmplifierTest.jpg" alt="Prototyping of the amplifier circuit" height="150"/>
+
 ### Battery
 The battery holder was designed into the PCB to allow the business card to remain as thin as possible. Some testing was done in advance (by dremeling a 1.6mm PCB to test-fit a battery) but mostly the design was copied from various online inspirations. This design worked really well on the first prototype PCB, so no modification was required, other than to add an indication of the correct polarity of the battery.
+
+<img src="./Doc/Images/BatteryTest1.jpg" alt="Initial test of battery holder" height="150"/><img src="./Doc/Images/BatteryTest2.jpg" alt="Initial test of battery holder" height="150"/><img src="./Doc/Images/PCB_Battery.jpg" alt="Battery holder on revision 1" height="150"/>
