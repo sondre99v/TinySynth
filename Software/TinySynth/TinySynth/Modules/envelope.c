@@ -27,13 +27,11 @@ void envelope_update(void)
 {
 	if (keyboard_get_gate()) {
 		// Exponential rise to 255. Add 0xFF to ensure the value is rounded up.
-		envelope_value += MULTIPLY_UINT8_ROUND_UP(255 - envelope_value, rise_speed);
-		//envelope_value += ((uint16_t)(255 - envelope_value) * ((uint16_t)rise_speed + 1) + 0xFF) >> 8;
+		envelope_value += ((uint16_t)(255 - envelope_value) * ((uint16_t)rise_speed + 1) + 0xFF) >> 8;
 	}
 	else {
 		// Exponential decay to 0. No addition before scaling to ensure the value is rounded down.
-		envelope_value -= MULTIPLY_UINT8_ROUND_UP(envelope_value, fall_speed);
-		//envelope_value -= ((uint16_t)envelope_value * ((uint16_t)fall_speed + 1)) >> 8;
+		envelope_value -= ((uint16_t)envelope_value * ((uint16_t)fall_speed + 1)) >> 8;
 	}
 }
 

@@ -9,6 +9,8 @@
 #ifndef ENVELOPE_H_
 #define ENVELOPE_H_
 
+#include <stdint.h>
+
 // Envelope parameters
 extern uint8_t rise_speed;
 extern uint8_t fall_speed;
