@@ -90,7 +90,8 @@ void oscillator_set_waveform(oscillator_t oscillator, waveform_t waveform)
 
 void oscillator_set_frequency(oscillator_t oscillator, uint16_t frequency_dHz)
 {
-	oscillators[(int)oscillator].timer_period = MAIN_CLOCK_FREQUENCY_HZ * 10 / ((uint32_t)frequency_dHz * SAMPLES_PR_WAVE);
+	oscillators[(int)oscillator].timer_period = 
+		MAIN_CLOCK_FREQUENCY_HZ * 10 / ((uint32_t)frequency_dHz * SAMPLES_PR_WAVE);
 }
 
 void oscillator_set_amplitude(oscillator_t oscillator, uint8_t amplitude)
@@ -103,30 +104,29 @@ void oscillator_set_sync(bool enabled)
 	oscillator_sync = enabled;
 }
 
-static void run_oscillator(oscillator_t oscillator) {
+static void run_oscillator(oscillator_data_t* osc_data) {
 	// Compute next sample value
 	volatile int16_t wave_sample;
 
-	switch(oscillators[(int)oscillator].waveform) {
+	switch(osc_data->waveform) {
 		case WAVE_SAW:
-		wave_sample = wave_saw[oscillators[(int)oscillator].wave_index];
+		wave_sample = wave_saw[osc_data->wave_index];
 		break;
 		case WAVE_TRIANGLE:
-		wave_sample = wave_tri[oscillators[(int)oscillator].wave_index];
+		wave_sample = wave_tri[osc_data->wave_index];
 		break;
 		case WAVE_SQUARE:
-		wave_sample = wave_squ[oscillators[(int)oscillator].wave_index];
+		wave_sample = wave_squ[osc_data->wave_index];
 		break;
 		case WAVE_SINE:
-		wave_sample = wave_sin[oscillators[(int)oscillator].wave_index];
+		wave_sample = wave_sin[osc_data->wave_index];
 		break;
 		default:
 		wave_sample = 0;
 		break;
 	}
 	
-	oscillators[(int)oscillator].current_sample = 
-		(((int16_t)oscillators[(int)oscillator].amplitude + 1) * wave_sample + 0x80) >> 8;
+	osc_data->current_sample = (((int16_t)osc_data->amplitude + 1) * wave_sample + 0x80) >> 8;
 	
 	volatile int16_t new_data = 
 		(int16_t)oscillators[(int)OSCILLATOR_A].current_sample + oscillators[(int)OSCILLATOR_B].current_sample;
@@ -144,12 +144,12 @@ static void run_oscillator(oscillator_t oscillator) {
 	
 	
 	// Compute current location within wave period
-	oscillators[(int)oscillator].wave_index++;
-	if (oscillators[(int)oscillator].wave_index >= SAMPLES_PR_WAVE) {
-		oscillators[(int)oscillator].wave_index = 0;
+	osc_data->wave_index++;
+	if (osc_data->wave_index >= SAMPLES_PR_WAVE) {
+		osc_data->wave_index = 0;
 		
 		// Sync oscillator B to oscillator A if enabled
-		if (oscillator_sync && oscillator == OSCILLATOR_A) {
+		if (oscillator_sync && osc_data == &oscillators[(int)OSCILLATOR_A]) {
 			oscillators[(int)OSCILLATOR_B].wave_index = 0;
 		}
 	}
@@ -159,7 +159,7 @@ static void run_oscillator(oscillator_t oscillator) {
 ISR(TCA0_OVF_vect)
 {
 	PORTC.OUTSET = (1 << 1);
-	run_oscillator(OSCILLATOR_A);
+	run_oscillator(&oscillators[(int)OSCILLATOR_A]);
 	PORTC.OUTCLR = (1 << 1);
 
 	TCA0.SINGLE.PER = oscillators[(int)OSCILLATOR_A].timer_period;
@@ -172,7 +172,7 @@ ISR(TCA0_OVF_vect)
 ISR(TCB0_INT_vect)
 {
 	PORTC.OUTSET = (1 << 2);
-	run_oscillator(OSCILLATOR_B);
+	run_oscillator(&oscillators[(int)OSCILLATOR_B]);
 	PORTC.OUTCLR = (1 << 2);
 	
 	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period;

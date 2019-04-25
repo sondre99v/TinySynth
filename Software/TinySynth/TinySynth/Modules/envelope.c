@@ -18,20 +18,20 @@ uint8_t fall_speed;
 void envelope_init(void)
 {
 	envelope_value = 0;
-	rise_speed = 128;
-	fall_speed = 128;
+	rise_speed = 3;
+	fall_speed = 3;
 }
 
 
 void envelope_update(void)
 {
-	if (keyboard_get_gate()) {
-		// Exponential rise to 255. Add 0xFF to ensure the value is rounded up.
-		envelope_value += ((uint16_t)(255 - envelope_value) * ((uint16_t)rise_speed + 1) + 0xFF) >> 8;
+	volatile uint8_t gate = keyboard_get_gate();
+	
+	if (gate && envelope_value < 255) {
+		envelope_value += rise_speed;
 	}
-	else {
-		// Exponential decay to 0. No addition before scaling to ensure the value is rounded down.
-		envelope_value -= ((uint16_t)envelope_value * ((uint16_t)fall_speed + 1)) >> 8;
+	else if (envelope_value > 0) {
+		envelope_value -= fall_speed;
 	}
 }
 

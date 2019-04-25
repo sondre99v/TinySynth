@@ -10,8 +10,8 @@
 #include <avr/io.h>
 
 
-static uint8_t note_value;
-static uint8_t gate_value;
+volatile static uint8_t note_value;
+volatile static uint8_t gate_value;
 
 
 void keyboard_init(void)
@@ -21,23 +21,22 @@ void keyboard_init(void)
 	ADC0.MUXPOS = ADC_MUXPOS_AIN3_gc;
 }
 
-
 void keyboard_update(void)
 {
 	ADC0.INTFLAGS = ADC_RESRDY_bm;
 	ADC0.COMMAND = ADC_STCONV_bm;
-
 	while (!(ADC0.INTFLAGS & ADC_RESRDY_bm)) { }
+	volatile uint8_t adc_value = ADC0.RES;
+
+	int8_t index = 19 - ((20 * adc_value + 0x80) >> 8);
 	
-	uint8_t adc_value = ADC0.RES;
-
-	// convert adc_value -> note_number
-
-	if (adc_value < 255) {
+	if (index >= 0) {
+		note_value = index;
 		gate_value = 1;
 	}
-
-	note_value = adc_value;
+	else {
+		gate_value = 0;
+	}
 }
 
 
