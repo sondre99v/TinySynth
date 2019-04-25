@@ -139,6 +139,12 @@
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Modules\config_panel.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Modules\config_panel.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="Modules\envelope.c">
       <SubType>compile</SubType>
     </Compile>
@@ -149,9 +155,6 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="Modules\keyboard.h">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Modules\module_settings.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="Modules\oscillator.c">

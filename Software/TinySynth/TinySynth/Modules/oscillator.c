@@ -40,14 +40,16 @@ typedef struct {
 	int16_t current_sample;
 	uint8_t wave_index;
 	uint16_t timer_period;
+	uint8_t octave;
 } oscillator_data_t;
 
-static volatile oscillator_data_t oscillators[] = {
+static oscillator_data_t oscillators[] = {
 	{
 		.waveform = WAVE_SILENCE,
 		.amplitude = 0,
 		.current_sample = 0,
 		.wave_index = 0,
+		.octave = 0,
 		.timer_period = 2000
 	},
 	{
@@ -55,6 +57,7 @@ static volatile oscillator_data_t oscillators[] = {
 		.amplitude = 0,
 		.current_sample = 0,
 		.wave_index = 0,
+		.octave = 0,
 		.timer_period = 2000
 	}
 };
@@ -99,6 +102,11 @@ void oscillator_set_amplitude(oscillator_t oscillator, uint8_t amplitude)
 	oscillators[(int)oscillator].amplitude = amplitude;
 }
 
+void oscillator_set_octave(oscillator_t oscillator, uint8_t octave)
+{
+	oscillators[(int)oscillator].octave = octave;
+}
+
 void oscillator_set_sync(bool enabled)
 {
 	oscillator_sync = enabled;
@@ -129,7 +137,8 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 	osc_data->current_sample = (((int16_t)osc_data->amplitude + 1) * wave_sample + 0x80) >> 8;
 	
 	volatile int16_t new_data = 
-		(int16_t)oscillators[(int)OSCILLATOR_A].current_sample + oscillators[(int)OSCILLATOR_B].current_sample;
+		(int16_t)oscillators[(int)OSCILLATOR_A].current_sample + 
+		oscillators[(int)OSCILLATOR_B].current_sample;
 	
 	if (new_data > MAX_SAMPLE) {
 		new_data = MAX_SAMPLE;
@@ -144,7 +153,7 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 	
 	
 	// Compute current location within wave period
-	osc_data->wave_index++;
+	osc_data->wave_index += (1 << osc_data->octave);
 	if (osc_data->wave_index >= SAMPLES_PR_WAVE) {
 		osc_data->wave_index = 0;
 		

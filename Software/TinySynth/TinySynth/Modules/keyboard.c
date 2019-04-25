@@ -21,6 +21,10 @@ void keyboard_init(void)
 	ADC0.MUXPOS = ADC_MUXPOS_AIN3_gc;
 }
 
+static const uint8_t thresholds[20] = {
+	8, 24, 37, 49, 62, 76, 88, 100, 113, 126, 139, 152, 164, 177, 191, 202, 213, 224, 236, 249
+};
+
 void keyboard_update(void)
 {
 	ADC0.INTFLAGS = ADC_RESRDY_bm;
@@ -28,7 +32,13 @@ void keyboard_update(void)
 	while (!(ADC0.INTFLAGS & ADC_RESRDY_bm)) { }
 	volatile uint8_t adc_value = ADC0.RES;
 
-	int8_t index = 19 - ((20 * adc_value + 0x80) >> 8);
+	int8_t index = 0;
+	
+	while(index < 20 && adc_value > thresholds[index]) {
+		index++;
+	}
+	
+	index = 19 - index;
 	
 	if (index >= 0) {
 		note_value = index;
