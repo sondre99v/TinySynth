@@ -58,8 +58,8 @@ int main(void)
 
 	oscillator_init();
 	
-	oscillator_set_amplitude(OSCILLATOR_A, 0x3000);
-	oscillator_set_amplitude(OSCILLATOR_B, 0x3000);
+	oscillator_set_amplitude(OSCILLATOR_A, 0x30);
+	oscillator_set_amplitude(OSCILLATOR_B, 0x30);
 	oscillator_set_waveform(OSCILLATOR_A, WAVE_SILENCE);
 	oscillator_set_waveform(OSCILLATOR_B, WAVE_SILENCE);
 
@@ -68,11 +68,11 @@ int main(void)
 	while (1) 
     {
 	    if (!(PORTB.IN & 0x1)) {
-		    oscillator_set_amplitude(OSCILLATOR_A, 0x8000);
+		    oscillator_set_amplitude(OSCILLATOR_A, 0x80);
 	    }
 	    
 	    if (!(PORTB.IN & 0x2)) {
-		    oscillator_set_amplitude(OSCILLATOR_A, 0x1000);
+		    oscillator_set_amplitude(OSCILLATOR_A, 0x10);
 	    }
 		
 		ADC0.INTFLAGS = ADC_RESRDY_bm;
@@ -86,7 +86,7 @@ int main(void)
 		if (play && index >= 0) {
 			//PORTC.OUT = 0;
 			oscillator_set_waveform(OSCILLATOR_A, WAVE_SAW);
-			oscillator_set_waveform(OSCILLATOR_B, WAVE_SQUARE);
+			oscillator_set_waveform(OSCILLATOR_B, WAVE_TRIANGLE);
 			oscillator_set_frequency(OSCILLATOR_A, freqs[index]);
 			oscillator_set_frequency(OSCILLATOR_B, freqs[index]+freqs[index]/2);
 		} else {

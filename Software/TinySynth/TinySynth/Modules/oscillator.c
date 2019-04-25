@@ -13,34 +13,30 @@
 
 #define SAMPLES_PR_WAVE 16
 #define MAIN_CLOCK_FREQUENCY_HZ 10000000ULL
-#define MAX_SAMPLE INT16_MAX
-#define MIN_SAMPLE INT16_MIN
+#define MAX_SAMPLE INT8_MAX
+#define MIN_SAMPLE INT8_MIN
 
 
-static const int16_t wave_sin[SAMPLES_PR_WAVE] = {
-	-1,  6392,  12539,  18204,  23169,  27244,  30272,  32137,  32767,  32137,  30272,  27244,  23169,  18204,  12539,  6392,
-	-1, -6393, -12540, -18205, -23170, -27245, -30273, -32138, -32768, -32138, -30273, -27245, -23170, -18205, -12540, -6393
+static const int8_t wave_sin[SAMPLES_PR_WAVE] = {
+	-1, 48, 89, 117, 127, 117, 89, 48, 0, -49, -90, -118, -128, -118, -90, -49
 };
 
-static const int16_t wave_tri[SAMPLES_PR_WAVE] = {
-	-1,  4095,  8191,  12287,  16383,  20479,  24575,  28671,  32767,  28671,  24575,  20479,  16383,  12287,  8191,  4095,
-	-1, -4096, -8192, -12288, -16384, -20480, -24576, -28672, -32768, -28672, -24576, -20480, -16384, -12288, -8192, -4096
+static const int8_t wave_tri[SAMPLES_PR_WAVE] = {
+	-1, 31, 63, 95, 127, 95, 63, 31, -1, -32, -64, -96, -128, -96, -64, -32
 };
 
-static const int16_t wave_squ[SAMPLES_PR_WAVE] = {
-	 32767,  32767,  32767,  32767,  32767,  32767,  32767,  32767,  32767,  32767,  32767,  32767,  32767,  32767,  32767,  32767,
-	-32768, -32768, -32768, -32768, -32768, -32768, -32768, -32768, -32768, -32768, -32768, -32768, -32768, -32768, -32768, -32768
+static const int8_t wave_squ[SAMPLES_PR_WAVE] = {
+	-128, -128, -128, -128, -128, -128, -128, -128, 127, 127, 127, 127, 127, 127, 127, 127
 };
 
-static const int16_t wave_saw[SAMPLES_PR_WAVE] = {
-	  1057,   3171,   5285,   7399,   9513,  11627,  13741,  15855,  17969,  20083,  22197,  24311, 26425, 28539, 30653, 32767,
-	-32768, -30654, -28540, -26426, -24312, -22198, -20084, -17970, -15856, -13742, -11628, -9514,  -7400, -5286, -3172, -1058
+static const int8_t wave_saw[SAMPLES_PR_WAVE] = {
+	8, 25, 42, 59, 76, 93, 110, 127, -128, -111, -94, -77, -60, -43, -26, -9
 };
 
 
 typedef struct {
 	waveform_t waveform;
-	uint16_t amplitude;
+	uint8_t amplitude;
 	int16_t current_sample;
 	uint8_t wave_index;
 	uint16_t timer_period;
@@ -97,7 +93,7 @@ void oscillator_set_frequency(oscillator_t oscillator, uint16_t frequency_dHz)
 	oscillators[(int)oscillator].timer_period = MAIN_CLOCK_FREQUENCY_HZ * 10 / ((uint32_t)frequency_dHz * SAMPLES_PR_WAVE);
 }
 
-void oscillator_set_amplitude(oscillator_t oscillator, uint16_t amplitude)
+void oscillator_set_amplitude(oscillator_t oscillator, uint8_t amplitude)
 {
 	oscillators[(int)oscillator].amplitude = amplitude;
 }
@@ -107,26 +103,22 @@ void oscillator_set_sync(bool enabled)
 	oscillator_sync = enabled;
 }
 
-
-uint8_t index = 0;
-volatile uint8_t log[64] = {0};
-
 static void run_oscillator(oscillator_t oscillator) {
 	// Compute next sample value
 	volatile int16_t wave_sample;
 
 	switch(oscillators[(int)oscillator].waveform) {
 		case WAVE_SAW:
-		wave_sample = wave_saw[oscillators[(int)oscillator].wave_index*2];
+		wave_sample = wave_saw[oscillators[(int)oscillator].wave_index];
 		break;
 		case WAVE_TRIANGLE:
-		wave_sample = wave_tri[oscillators[(int)oscillator].wave_index*2];
+		wave_sample = wave_tri[oscillators[(int)oscillator].wave_index];
 		break;
 		case WAVE_SQUARE:
-		wave_sample = wave_squ[oscillators[(int)oscillator].wave_index*2];
+		wave_sample = wave_squ[oscillators[(int)oscillator].wave_index];
 		break;
 		case WAVE_SINE:
-		wave_sample = wave_sin[oscillators[(int)oscillator].wave_index*2];
+		wave_sample = wave_sin[oscillators[(int)oscillator].wave_index];
 		break;
 		default:
 		wave_sample = 0;
@@ -134,10 +126,10 @@ static void run_oscillator(oscillator_t oscillator) {
 	}
 	
 	oscillators[(int)oscillator].current_sample = 
-		(((int32_t)oscillators[(int)oscillator].amplitude + 1) * wave_sample + 0x8000) >> 16;
+		(((int16_t)oscillators[(int)oscillator].amplitude + 1) * wave_sample + 0x80) >> 8;
 	
-	volatile int32_t new_data = 
-		(int32_t)oscillators[(int)OSCILLATOR_A].current_sample + oscillators[(int)OSCILLATOR_B].current_sample;
+	volatile int16_t new_data = 
+		(int16_t)oscillators[(int)OSCILLATOR_A].current_sample + oscillators[(int)OSCILLATOR_B].current_sample;
 	
 	if (new_data > MAX_SAMPLE) {
 		new_data = MAX_SAMPLE;
@@ -146,9 +138,7 @@ static void run_oscillator(oscillator_t oscillator) {
 		new_data = MIN_SAMPLE;
 	}
 	
-	volatile uint8_t dac_data = (uint8_t)(0x80 + ((new_data + 0x0080) >> 8));
-	log[(index++) & 0x3F] = dac_data;
-
+	volatile uint8_t dac_data = (uint8_t)(0x80 + new_data);
 
 	DAC0.DATA = dac_data;
 	
