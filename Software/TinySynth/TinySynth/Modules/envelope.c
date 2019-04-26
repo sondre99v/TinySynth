@@ -11,15 +11,13 @@
 
 static uint8_t envelope_value;
 
-uint8_t rise_speed;
-uint8_t fall_speed;
+uint8_t envelope_rise_speed;
+uint8_t envelope_fall_speed;
 
 
 void envelope_init(void)
 {
 	envelope_value = 0;
-	rise_speed = 3;
-	fall_speed = 3;
 }
 
 
@@ -28,10 +26,21 @@ void envelope_update(void)
 	volatile uint8_t gate = keyboard_get_gate();
 	
 	if (gate && envelope_value < 255) {
-		envelope_value += rise_speed;
+		if (envelope_value > 255 - envelope_rise_speed) {
+			envelope_value = 255;
+		}
+		else {
+			envelope_value += envelope_rise_speed;
+		}
 	}
-	else if (envelope_value > 0) {
-		envelope_value -= fall_speed;
+	
+	if (!gate && envelope_value > 0) {
+		if (envelope_value < envelope_fall_speed) {
+			envelope_value = 0;
+		} 
+		else {
+			envelope_value -= envelope_fall_speed;
+		}
 	}
 }
 

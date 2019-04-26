@@ -12,8 +12,8 @@
 #include <stdint.h>
 
 // Envelope parameters
-extern uint8_t rise_speed;
-extern uint8_t fall_speed;
+extern uint8_t envelope_rise_speed;
+extern uint8_t envelope_fall_speed;
 
 
 void envelope_init(void);

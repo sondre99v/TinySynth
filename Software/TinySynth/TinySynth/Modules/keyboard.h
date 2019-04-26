@@ -19,5 +19,7 @@ void keyboard_update(void);
 uint8_t keyboard_get_note(void);
 uint8_t keyboard_get_gate(void);
 
+void keyboard_pulse_gate(void);
+
 
 #endif /* KEYBOARD_H_ */

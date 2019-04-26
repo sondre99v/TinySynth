@@ -11,7 +11,8 @@
 #include "Modules/oscillator.h"
 #include "Modules/keyboard.h"
 #include "Modules/envelope.h"
-#include "Modules/config_panel.h"
+#include "Modules/patch_panel.h"
+#include "Modules/patch.h"
 
 #define TIME_TIMER_PERIOD 6250 // Gives 100Hz frequency with 20MHz clock and 32x prescaler
 
@@ -27,11 +28,7 @@ int main(void)
 	// Disable main clock prescaler to get 10MHz speed
 	CCP = CCP_IOREG_gc;
 	CLKCTRL.MCLKCTRLB = 1;
-	
-	// Enable the "sync" LED
-	PORTC.DIRSET = 0x7;
-	PORTC.OUT = 0x1;
-	
+
 	uint16_t freqs[] = {
 		1746, 1850, 1960, 2077, 2200, 2331, 2469, 2616, 2772, 2937,
 		3111, 3296, 3492, 3700, 3920, 4153, 4400, 4662, 4939, 5233,
@@ -43,41 +40,19 @@ int main(void)
 	TCD0.CTRLA = TCD_CNTPRES_DIV32_gc | TCD_ENABLE_bm;
 
 	oscillator_init();
-	config_panel_init();
 	keyboard_init();
 	envelope_init();
-	
-	oscillator_set_amplitude(OSCILLATOR_A, 0x00);
-	oscillator_set_amplitude(OSCILLATOR_B, 0x00);
-	oscillator_set_waveform(OSCILLATOR_A, WAVE_SAW);
-	oscillator_set_waveform(OSCILLATOR_B, WAVE_SQUARE);
+	patch_panel_init();
+	patch_init();
 
 	sei();
 
 	while (1) 
     {
-	    if (!(PORTB.IN & 0x1)) {
-		    oscillator_set_octave(OSCILLATOR_B, 0);
-		    PORTC.OUTSET = 1;
-	    }
-	    
-	    if (!(PORTB.IN & 0x2)) {
-		    oscillator_set_octave(OSCILLATOR_B, 1);
-		    PORTC.OUTCLR = 1;
-	    }
-		
 		if (update_pending) {
-			config_panel_update();
+			patch_panel_update();
 			keyboard_update();
 			envelope_update();
-		
-			volatile uint8_t gate = keyboard_get_gate();
-			if (gate) {
-				//PORTC.OUTCLR = 1;
-			}
-			else {
-				//PORTC.OUTSET = 1;
-			}
 		
 			volatile uint8_t amp_eg = envelope_get_value();
 		

@@ -12,6 +12,7 @@
 
 volatile static uint8_t note_value;
 volatile static uint8_t gate_value;
+volatile static uint8_t gate_pulse_timer = 0;
 
 
 void keyboard_init(void)
@@ -47,6 +48,11 @@ void keyboard_update(void)
 	else {
 		gate_value = 0;
 	}
+
+	if (gate_pulse_timer > 0) {
+		gate_value = 1;
+		gate_pulse_timer--;
+	}
 }
 
 
@@ -59,4 +65,9 @@ uint8_t keyboard_get_note(void)
 uint8_t keyboard_get_gate(void)
 {
 	return gate_value;
+}
+
+void keyboard_pulse_gate(void)
+{
+	gate_pulse_timer = 100;
 }

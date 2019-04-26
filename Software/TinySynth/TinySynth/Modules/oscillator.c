@@ -41,6 +41,7 @@ typedef struct {
 	uint8_t wave_index;
 	uint16_t timer_period;
 	uint8_t octave;
+	uint8_t detune;
 } oscillator_data_t;
 
 static oscillator_data_t oscillators[] = {
@@ -50,7 +51,8 @@ static oscillator_data_t oscillators[] = {
 		.current_sample = 0,
 		.wave_index = 0,
 		.octave = 0,
-		.timer_period = 2000
+		.timer_period = 2000,
+		.detune = 0
 	},
 	{
 		.waveform = WAVE_SILENCE,
@@ -58,7 +60,8 @@ static oscillator_data_t oscillators[] = {
 		.current_sample = 0,
 		.wave_index = 0,
 		.octave = 0,
-		.timer_period = 2000
+		.timer_period = 2000,
+		.detune = 0
 	}
 };
 
@@ -105,6 +108,11 @@ void oscillator_set_amplitude(oscillator_t oscillator, uint8_t amplitude)
 void oscillator_set_octave(oscillator_t oscillator, uint8_t octave)
 {
 	oscillators[(int)oscillator].octave = octave;
+}
+
+void oscillator_set_detune(oscillator_t oscillator, uint8_t detune)
+{
+	oscillators[(int)oscillator].detune = detune;
 }
 
 void oscillator_set_sync(bool enabled)
@@ -167,11 +175,9 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 // Interrupt handler for oscillator A
 ISR(TCA0_OVF_vect)
 {
-	PORTC.OUTSET = (1 << 1);
 	run_oscillator(&oscillators[(int)OSCILLATOR_A]);
-	PORTC.OUTCLR = (1 << 1);
 
-	TCA0.SINGLE.PER = oscillators[(int)OSCILLATOR_A].timer_period;
+	TCA0.SINGLE.PER = oscillators[(int)OSCILLATOR_A].timer_period + (((uint32_t)oscillators[(int)OSCILLATOR_A].timer_period * oscillators[(int)OSCILLATOR_A].detune) >> 8);
 
 	// Clear interrupt flag
 	TCA0.SINGLE.INTFLAGS = TCA_SINGLE_OVF_bm;
@@ -180,11 +186,9 @@ ISR(TCA0_OVF_vect)
 // Interrupt handler for oscillator B
 ISR(TCB0_INT_vect)
 {
-	PORTC.OUTSET = (1 << 2);
 	run_oscillator(&oscillators[(int)OSCILLATOR_B]);
-	PORTC.OUTCLR = (1 << 2);
 	
-	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period;
+	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period + (((uint32_t)oscillators[(int)OSCILLATOR_B].timer_period * oscillators[(int)OSCILLATOR_B].detune) >> 8);;
 
 	// Clear interrupt flag
 	TCB0.INTFLAGS = TCB_CAPT_bm;
