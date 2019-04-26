@@ -25,6 +25,7 @@ typedef enum {
 } button_t;
 
 static button_t held_button;
+static uint8_t button_holdoff_timer = 0;
 
 void _set_led(uint8_t led, bool on) {
 	if (led < 6) {
@@ -59,6 +60,11 @@ void patch_panel_init(void)
 
 void patch_panel_update(void)
 {
+	if (button_holdoff_timer) {
+		button_holdoff_timer--;
+		return;
+	}
+	
 	uint8_t buttons = ~PORTB.IN;
 	
 	volatile button_t button_event = BUTTON_NONE;
@@ -81,39 +87,35 @@ void patch_panel_update(void)
 	{
 		case BUTTON_OSC1_OCT:
 			patch_cycle_oscA_octave();
-			keyboard_pulse_gate();
 			break;
 		case BUTTON_OSC1_WAVE:
 			patch_cycle_oscA_wave();
-			keyboard_pulse_gate();
 			break;
 		case BUTTON_EG_RISE:
 			patch_toggle_eg_rise();
-			keyboard_pulse_gate();
 			break;
 		case BUTTON_EG_FALL:
 			patch_toggle_eg_fall();
-			keyboard_pulse_gate();
 			break;
 		case BUTTON_OSC2_OCT:
 			patch_cycle_oscB_octave();
-			keyboard_pulse_gate();
 			break;
 		case BUTTON_OSC2_WAVE:
 			patch_cycle_oscB_wave();
-			keyboard_pulse_gate();
 			break;
 		case BUTTON_OSC2_TUNE:
 			patch_cycle_oscB_detune();
-			keyboard_pulse_gate();
 			break;
 		case BUTTON_SYNC:
 			patch_toggle_sync();
-			keyboard_pulse_gate();
 			break;
 		default: break;
 	}
-
+	
+	if (button_event != BUTTON_NONE) {
+		keyboard_pulse_gate();
+		button_holdoff_timer = 50;
+	}
 }
 
 void patch_panel_set_led(patch_led_t led, uint8_t value)

@@ -18,9 +18,17 @@
 #define EG_FAST_FALL_SPEED 50
 #define EG_SLOW_FALL_SPEED 2
 
+//   0 - Unison
+//  43 - Minor third
+//  51 - Major third
+//  64 - Major fourth
+//  85 - Fifth
+// 128 - Octave
 #define DETUNE_STEP_0 0
-#define DETUNE_STEP_1 12
-#define DETUNE_STEP_2 128
+#define DETUNE_STEP_1 43
+#define DETUNE_STEP_2 51
+#define DETUNE_STEP_3 64
+#define DETUNE_STEP_4 85
 
 
 static const patch_t default_patch = {
@@ -35,19 +43,20 @@ static const patch_t default_patch = {
 	.eg_fall_speed = EG_SLOW_FALL_SPEED
 };
 
+static const patch_t debug_patchA = {
+	.oscA_octave = 0,
+	.oscA_wave = WAVE_SQUARE,
+	.oscB_octave = 0,
+	.oscB_wave = WAVE_SQUARE,
+	.oscB_detune = DETUNE_STEP_0,
+	.oscB_enabled = true,
+	.sync = false,
+	.eg_rise_speed = EG_FAST_RISE_SPEED,
+	.eg_fall_speed = EG_FAST_FALL_SPEED
+};
+
 
 static patch_t active_patch;
-
-
-uint8_t _get_amplitude_for_wave(waveform_t waveform) {
-	switch(waveform) {
-		case WAVE_SINE: return 0xFF;
-		case WAVE_TRIANGLE: return 0xFF;
-		case WAVE_SQUARE: return 0x80;
-		case WAVE_SAW: return 0x60;
-		default: return 0x00;
-	}
-}
 
 void _apply_patch(patch_t* patch)
 {
@@ -55,11 +64,9 @@ void _apply_patch(patch_t* patch)
 
 	oscillator_set_octave(OSCILLATOR_A, active_patch.oscA_octave);
 	oscillator_set_waveform(OSCILLATOR_A, active_patch.oscA_wave);
-	oscillator_set_amplitude(OSCILLATOR_A, _get_amplitude_for_wave(active_patch.oscA_wave));
 
 	oscillator_set_octave(OSCILLATOR_B, active_patch.oscB_octave);
 	oscillator_set_waveform(OSCILLATOR_B, active_patch.oscB_enabled ? active_patch.oscB_wave : WAVE_SILENCE);
-	oscillator_set_amplitude(OSCILLATOR_B, _get_amplitude_for_wave(active_patch.oscB_wave));
 
 	oscillator_set_detune(OSCILLATOR_B, active_patch.oscB_detune);
 	oscillator_set_sync(active_patch.sync);
@@ -76,7 +83,8 @@ void _apply_patch(patch_t* patch)
 
 void patch_init(void)
 {
-	_apply_patch(&default_patch);
+	//_apply_patch(&default_patch);
+	_apply_patch(&debug_patchA);
 }
 
 void patch_cycle_oscA_octave(void)
@@ -140,7 +148,9 @@ void patch_cycle_oscB_detune(void)
 	switch(active_patch.oscB_detune) {
 		case DETUNE_STEP_0: active_patch.oscB_detune = DETUNE_STEP_1; break;
 		case DETUNE_STEP_1: active_patch.oscB_detune = DETUNE_STEP_2; break;
-		case DETUNE_STEP_2: active_patch.oscB_detune = DETUNE_STEP_0; break;
+		case DETUNE_STEP_2: active_patch.oscB_detune = DETUNE_STEP_3; break;
+		case DETUNE_STEP_3: active_patch.oscB_detune = DETUNE_STEP_4; break;
+		case DETUNE_STEP_4: active_patch.oscB_detune = DETUNE_STEP_0; break;
 		default: active_patch.oscB_detune = 0; break;
 	}
 	_apply_patch(&active_patch);

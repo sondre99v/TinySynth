@@ -92,6 +92,15 @@ void oscillator_init(void)
 void oscillator_set_waveform(oscillator_t oscillator, waveform_t waveform)
 {
 	oscillators[(int)oscillator].waveform = waveform;
+	
+	if (waveform == WAVE_SILENCE) {
+		if (oscillator == OSCILLATOR_A) TCA0.SINGLE.CTRLA &= ~TCA_SINGLE_ENABLE_bm;
+		if (oscillator == OSCILLATOR_B) TCB0.CTRLA &= ~TCB_ENABLE_bm;
+	}
+	else {
+		if (oscillator == OSCILLATOR_A) TCA0.SINGLE.CTRLA = TCA_SINGLE_ENABLE_bm;
+		if (oscillator == OSCILLATOR_B) TCB0.CTRLA = TCB_ENABLE_bm;
+	}
 }
 
 void oscillator_set_frequency(oscillator_t oscillator, uint16_t frequency_dHz)
@@ -120,6 +129,15 @@ void oscillator_set_sync(bool enabled)
 	oscillator_sync = enabled;
 }
 
+uint8_t _get_amplitude_for_wave(waveform_t waveform) {
+	switch(waveform) {
+		case WAVE_SINE: return 0xD0;
+		case WAVE_TRIANGLE: return 0xC0;
+		case WAVE_SQUARE: return 0x80;
+		case WAVE_SAW: return 0x60;
+		default: return 0x00;
+	}
+}
 static void run_oscillator(oscillator_data_t* osc_data) {
 	// Compute next sample value
 	volatile int16_t wave_sample;
@@ -142,7 +160,7 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 		break;
 	}
 	
-	osc_data->current_sample = (((int16_t)osc_data->amplitude + 1) * wave_sample + 0x80) >> 8;
+	osc_data->current_sample = (((int32_t)osc_data->amplitude + 1) * _get_amplitude_for_wave(osc_data->waveform) * wave_sample + 0x8000) >> 16;
 	
 	volatile int16_t new_data = 
 		(int16_t)oscillators[(int)OSCILLATOR_A].current_sample + 
@@ -177,8 +195,8 @@ ISR(TCA0_OVF_vect)
 {
 	run_oscillator(&oscillators[(int)OSCILLATOR_A]);
 
-	TCA0.SINGLE.PER = oscillators[(int)OSCILLATOR_A].timer_period + (((uint32_t)oscillators[(int)OSCILLATOR_A].timer_period * oscillators[(int)OSCILLATOR_A].detune) >> 8);
-
+	TCA0.SINGLE.PER = oscillators[(int)OSCILLATOR_A].timer_period - (((uint32_t)oscillators[(int)OSCILLATOR_A].timer_period * oscillators[(int)OSCILLATOR_A].detune) >> 8);
+	
 	// Clear interrupt flag
 	TCA0.SINGLE.INTFLAGS = TCA_SINGLE_OVF_bm;
 }
@@ -188,7 +206,7 @@ ISR(TCB0_INT_vect)
 {
 	run_oscillator(&oscillators[(int)OSCILLATOR_B]);
 	
-	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period + (((uint32_t)oscillators[(int)OSCILLATOR_B].timer_period * oscillators[(int)OSCILLATOR_B].detune) >> 8);;
+	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period - (((uint32_t)oscillators[(int)OSCILLATOR_B].timer_period * oscillators[(int)OSCILLATOR_B].detune) >> 8);;
 
 	// Clear interrupt flag
 	TCB0.INTFLAGS = TCB_CAPT_bm;
