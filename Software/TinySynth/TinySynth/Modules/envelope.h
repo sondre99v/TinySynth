@@ -3,7 +3,7 @@
  *
  * Created: 13/04/19 12:17:58
  *  Author: Sondre
- */ 
+ */
 
 
 #ifndef ENVELOPE_H_

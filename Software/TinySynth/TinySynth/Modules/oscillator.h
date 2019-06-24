@@ -3,7 +3,7 @@
  *
  * Created: 19/04/19 12:17:44
  *  Author: Sondre
- */ 
+ */
 
 
 #ifndef OSCILLATOR_H_
@@ -24,7 +24,7 @@ typedef enum {
 } waveform_t;
 
 typedef enum {
-	OSCILLATOR_A = 0, 
+	OSCILLATOR_A = 0,
 	OSCILLATOR_B = 1
 } oscillator_t;
 

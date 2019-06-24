@@ -3,7 +3,7 @@
  *
  * Created: 19/04/19 12:17:55
  *  Author: Sondre
- */ 
+ */
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -86,18 +86,18 @@ void oscillator_init(void)
 {
 	// Enable the 2.5V reference for the DAC
 	VREF.CTRLA = (VREF_DAC0REFSEL_2V5_gc << VREF_DAC0REFSEL0_bp);
-	
+
 	// Set the output voltage to center
 	DAC0.DATA = 128;
-	
+
 	// Enable the DAC and enable the output
 	DAC0.CTRLA = DAC_OUTEN_bm | DAC_ENABLE_bm;
-	
+
 	// Enable the oscillators
 	TCA0.SINGLE.PERBUF = oscillators[(int)OSCILLATOR_A].timer_period;
 	TCA0.SINGLE.INTCTRL = TCA_SINGLE_OVF_bm;
 	TCA0.SINGLE.CTRLA = TCA_SINGLE_ENABLE_bm;
-	
+
 	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period;
 	TCB0.INTCTRL = TCB_CAPT_bm;
 	TCB0.CTRLA = TCB_ENABLE_bm;
@@ -106,7 +106,7 @@ void oscillator_init(void)
 void oscillator_set_waveform(oscillator_t oscillator, waveform_t waveform)
 {
 	oscillators[(int)oscillator].waveform = waveform;
-	
+
 	if (waveform == WAVE_SILENCE) {
 		if (oscillator == OSCILLATOR_A) TCA0.SINGLE.CTRLA &= ~TCA_SINGLE_ENABLE_bm;
 		if (oscillator == OSCILLATOR_B) TCB0.CTRLA &= ~TCB_ENABLE_bm;
@@ -119,7 +119,7 @@ void oscillator_set_waveform(oscillator_t oscillator, waveform_t waveform)
 
 void oscillator_set_frequency(oscillator_t oscillator, uint16_t frequency_dHz)
 {
-	oscillators[(int)oscillator].timer_period = 
+	oscillators[(int)oscillator].timer_period =
 		MAIN_CLOCK_FREQUENCY_HZ * 10 / ((uint32_t)frequency_dHz * SAMPLES_PR_WAVE);
 }
 
@@ -178,30 +178,30 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 		wave_sample = 0;
 		break;
 	}
-	
+
 	osc_data->current_sample = (((int32_t)osc_data->amplitude + 1) * _get_amplitude_for_wave(osc_data->waveform) * wave_sample + 0x8000) >> 16;
-	
-	volatile int16_t new_data = 
-		(int16_t)oscillators[(int)OSCILLATOR_A].current_sample + 
+
+	volatile int16_t new_data =
+		(int16_t)oscillators[(int)OSCILLATOR_A].current_sample +
 		oscillators[(int)OSCILLATOR_B].current_sample;
-	
+
 	if (new_data > MAX_SAMPLE) {
 		new_data = MAX_SAMPLE;
 	}
 	else if (new_data < MIN_SAMPLE) {
 		new_data = MIN_SAMPLE;
 	}
-	
+
 	volatile uint8_t dac_data = (uint8_t)(0x80 + new_data);
 
 	DAC0.DATA = dac_data;
-	
-	
+
+
 	// Compute current location within wave period
 	osc_data->wave_index += (1 << osc_data->octave);
 	if (osc_data->wave_index >= SAMPLES_PR_WAVE) {
 		osc_data->wave_index = 0;
-		
+
 		// Sync oscillator B to oscillator A if enabled
 		if (oscillator_sync && osc_data == &oscillators[(int)OSCILLATOR_A]) {
 			oscillators[(int)OSCILLATOR_B].wave_index = 0;
@@ -215,7 +215,7 @@ ISR(TCA0_OVF_vect)
 	run_oscillator(&oscillators[(int)OSCILLATOR_A]);
 
 	TCA0.SINGLE.PER = oscillators[(int)OSCILLATOR_A].timer_period - (((uint32_t)oscillators[(int)OSCILLATOR_A].timer_period * oscillators[(int)OSCILLATOR_A].detune) >> 8);
-	
+
 	// Clear interrupt flag
 	TCA0.SINGLE.INTFLAGS = TCA_SINGLE_OVF_bm;
 }
@@ -224,7 +224,7 @@ ISR(TCA0_OVF_vect)
 ISR(TCB0_INT_vect)
 {
 	run_oscillator(&oscillators[(int)OSCILLATOR_B]);
-	
+
 	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period - (((uint32_t)oscillators[(int)OSCILLATOR_B].timer_period * oscillators[(int)OSCILLATOR_B].detune) >> 8);;
 
 	// Clear interrupt flag

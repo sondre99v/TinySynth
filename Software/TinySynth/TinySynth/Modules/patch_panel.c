@@ -3,8 +3,8 @@
  *
  * Created: 2019-04-26 00:24:15
  *  Author: Sondre
- */ 
- 
+ */
+
 #include "patch_panel.h"
 
 #include <avr/io.h>
@@ -50,7 +50,7 @@ void patch_panel_init(void)
 	PORTB.PIN5CTRL = PORT_PULLUPEN_bm;
 	PORTB.PIN6CTRL = PORT_PULLUPEN_bm;
 	PORTB.PIN7CTRL = PORT_PULLUPEN_bm;
-	
+
 	// Enable the LEDs
 	PORTC.DIRSET = 0x3F;
 	PORTA.DIRSET = 0x06;
@@ -64,9 +64,9 @@ void patch_panel_update(void)
 		button_holdoff_timer--;
 		return;
 	}
-	
+
 	uint8_t buttons = ~PORTB.IN;
-	
+
 	volatile button_t button_event = BUTTON_NONE;
 	if (buttons == 0x00) {
 		held_button = BUTTON_NONE;
@@ -111,7 +111,7 @@ void patch_panel_update(void)
 			break;
 		default: break;
 	}
-	
+
 	if (button_event != BUTTON_NONE) {
 		keyboard_pulse_gate();
 		button_holdoff_timer = 50;

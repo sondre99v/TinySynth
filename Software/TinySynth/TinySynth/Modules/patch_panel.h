@@ -3,7 +3,7 @@
  *
  * Created: 2019-04-25 23:37:52
  *  Author: Sondre
- */ 
+ */
 
 
 #ifndef PATCH_PANEL_H_

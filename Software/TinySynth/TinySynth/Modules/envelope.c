@@ -3,7 +3,7 @@
  *
  * Created: 13/04/19 18:31:53
  *  Author: Sondre
- */ 
+ */
 
 #include "envelope.h"
 #include "keyboard.h"
@@ -29,15 +29,15 @@ void envelope_init(envelope_t* envelope)
 void envelope_update(envelope_t* envelope)
 {
 	volatile uint8_t gate = keyboard_get_gate();
-	
+
 	if (!gate) {
 		envelope->state = EGSTATE_RELEASE;
 	}
-	
+
 	if (gate && envelope->state == EGSTATE_RELEASE) {
 		envelope->state = EGSTATE_ATTACK;
 	}
-	
+
 	switch (envelope->state)
 	{
 	case EGSTATE_ATTACK:

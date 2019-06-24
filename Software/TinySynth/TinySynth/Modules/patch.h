@@ -3,7 +3,7 @@
  *
  * Created: 26/04/19 16:08:40
  *  Author: Sondre
- */ 
+ */
 
 
 #ifndef PATCH_H_

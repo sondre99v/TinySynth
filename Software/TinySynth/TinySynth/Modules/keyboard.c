@@ -3,7 +3,7 @@
  *
  * Created: 13/04/19 18:20:08
  *  Author: Sondre
- */ 
+ */
 
 #include "keyboard.h"
 
@@ -34,13 +34,13 @@ void keyboard_update(void)
 	volatile uint8_t adc_value = ADC0.RES;
 
 	int8_t index = 0;
-	
+
 	while(index < 20 && adc_value > thresholds[index]) {
 		index++;
 	}
-	
+
 	index = 19 - index;
-	
+
 	if (index >= 0) {
 		note_value = index;
 		gate_value = 1;

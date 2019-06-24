@@ -3,8 +3,8 @@
  *
  * Created: 26/04/19 16:08:57
  *  Author: Sondre
- */ 
- 
+ */
+
 #include "patch.h"
 
 #include <stdbool.h>
@@ -78,7 +78,7 @@ void _apply_patch(const patch_t* patch)
 	ENVELOPE_B->decay_speed = 10;
 	ENVELOPE_B->sustain_value = 0;
 	ENVELOPE_B->release_speed = 10;//active_patch.eg_fall_speed;
-	
+
 	patch_panel_set_led(PATCH_LED_OSCA_WAVE, (uint8_t)active_patch.oscA_wave);
 	patch_panel_set_led(PATCH_LED_OSCB_ENABLED, (uint8_t)active_patch.oscB_enabled);
 	patch_panel_set_led(PATCH_LED_OSCB_WAVE, (uint8_t)active_patch.oscB_wave);
@@ -110,14 +110,14 @@ void patch_cycle_oscB_octave(void)
 	if (!active_patch.oscB_enabled) {
 		active_patch.oscB_enabled = true;
 		active_patch.oscB_octave = 0;
-	} 
+	}
 	else {
 		active_patch.oscB_octave++;
 		if (active_patch.oscB_octave > 2) {
 			active_patch.oscB_enabled = false;
 		}
 	}
-	
+
 	_apply_patch(&active_patch);
 }
 
