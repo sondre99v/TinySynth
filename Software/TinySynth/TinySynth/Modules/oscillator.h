@@ -19,7 +19,8 @@ typedef enum {
 	WAVE_SINE = 0,
 	WAVE_TRIANGLE = 1,
 	WAVE_SQUARE = 2,
-	WAVE_SAW = 3
+	WAVE_SAW = 3,
+	WAVE_NOISE = 4
 } waveform_t;
 
 typedef enum {

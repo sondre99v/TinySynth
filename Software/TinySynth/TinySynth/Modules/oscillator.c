@@ -33,6 +33,20 @@ static const int8_t wave_saw[SAMPLES_PR_WAVE] = {
 	8, 25, 42, 59, 76, 93, 110, 127, -128, -111, -94, -77, -60, -43, -26, -9
 };
 
+static int8_t wave_noise_get_sample() {
+	static uint16_t lfsr = 0xACE1;
+	uint8_t output = 0;
+
+	for(int i = 0; i < 8; i++) {
+		output = (output << 1) | (lfsr & 1);
+		lfsr >>= 1;
+		if (lfsr & 1) {
+			lfsr ^= 0xB400;
+		}
+	}
+
+	return *(int8_t*)&output;
+}
 
 typedef struct {
 	waveform_t waveform;
@@ -135,9 +149,11 @@ uint8_t _get_amplitude_for_wave(waveform_t waveform) {
 		case WAVE_TRIANGLE: return 0xC0;
 		case WAVE_SQUARE: return 0x80;
 		case WAVE_SAW: return 0x60;
+		case WAVE_NOISE: return 0x60;
 		default: return 0x00;
 	}
 }
+
 static void run_oscillator(oscillator_data_t* osc_data) {
 	// Compute next sample value
 	volatile int16_t wave_sample;
@@ -154,6 +170,9 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 		break;
 		case WAVE_SINE:
 		wave_sample = wave_sin[osc_data->wave_index];
+		break;
+		case WAVE_NOISE:
+		wave_sample = wave_noise_get_sample();
 		break;
 		default:
 		wave_sample = 0;

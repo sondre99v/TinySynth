@@ -95,7 +95,7 @@ void patch_cycle_oscA_octave(void)
 
 void patch_cycle_oscA_wave(void)
 {
-	active_patch.oscA_wave = (waveform_t)((int)active_patch.oscA_wave + 1) % 4;
+	active_patch.oscA_wave = (waveform_t)((int)active_patch.oscA_wave + 1) % 5;
 	_apply_patch(&active_patch);
 }
 
@@ -117,7 +117,7 @@ void patch_cycle_oscB_octave(void)
 
 void patch_cycle_oscB_wave(void)
 {
-	active_patch.oscB_wave = (waveform_t)((int)active_patch.oscB_wave + 1) % 4;
+	active_patch.oscB_wave = (waveform_t)((int)active_patch.oscB_wave + 1) % 5;
 	_apply_patch(&active_patch);
 }
 
