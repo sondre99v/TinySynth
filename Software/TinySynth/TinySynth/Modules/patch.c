@@ -58,7 +58,7 @@ static const patch_t debug_patchA = {
 
 static patch_t active_patch;
 
-void _apply_patch(patch_t* patch)
+void _apply_patch(const patch_t* patch)
 {
 	active_patch = *patch;
 
@@ -70,8 +70,14 @@ void _apply_patch(patch_t* patch)
 
 	oscillator_set_detune(OSCILLATOR_B, active_patch.oscB_detune);
 	oscillator_set_sync(active_patch.sync);
-	envelope_rise_speed = active_patch.eg_rise_speed;
-	envelope_fall_speed = active_patch.eg_fall_speed;
+	ENVELOPE_A->attack_speed = active_patch.eg_rise_speed;
+	ENVELOPE_A->decay_speed = 255;
+	ENVELOPE_A->sustain_value = 255;
+	ENVELOPE_A->release_speed = active_patch.eg_fall_speed;
+	ENVELOPE_B->attack_speed = 255;//active_patch.eg_rise_speed;
+	ENVELOPE_B->decay_speed = 10;
+	ENVELOPE_B->sustain_value = 0;
+	ENVELOPE_B->release_speed = 10;//active_patch.eg_fall_speed;
 	
 	patch_panel_set_led(PATCH_LED_OSCA_WAVE, (uint8_t)active_patch.oscA_wave);
 	patch_panel_set_led(PATCH_LED_OSCB_ENABLED, (uint8_t)active_patch.oscB_enabled);

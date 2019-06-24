@@ -11,15 +11,24 @@
 
 #include <stdint.h>
 
-// Envelope parameters
-extern uint8_t envelope_rise_speed;
-extern uint8_t envelope_fall_speed;
+typedef struct {
+	uint8_t value;
+	uint8_t attack_speed;
+	uint8_t decay_speed;
+	uint8_t sustain_value;
+	uint8_t release_speed;
+	enum {
+		EGSTATE_ATTACK,
+		EGSTATE_DECAY,
+		EGSTATE_SUSTAIN,
+		EGSTATE_RELEASE
+	} state;
+} envelope_t;
 
+extern envelope_t* const ENVELOPE_A;
+extern envelope_t* const ENVELOPE_B;
 
-void envelope_init(void);
-void envelope_update(void);
-
-uint8_t envelope_get_value(void);
-
+void envelope_init(envelope_t* envelope);
+void envelope_update(envelope_t* envelope);
 
 #endif /* ENVELOPE_H_ */

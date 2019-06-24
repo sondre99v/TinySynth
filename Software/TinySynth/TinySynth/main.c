@@ -55,7 +55,8 @@ int main(void)
 
 	oscillator_init();
 	keyboard_init();
-	envelope_init();
+	envelope_init(ENVELOPE_A);
+	envelope_init(ENVELOPE_B);
 	patch_panel_init();
 	patch_init();
 
@@ -66,12 +67,11 @@ int main(void)
 		if (update_pending) {
 			patch_panel_update();
 			keyboard_update();
-			envelope_update();
+			envelope_update(ENVELOPE_A);
+			envelope_update(ENVELOPE_B);
 		
-			volatile uint8_t amp_eg = envelope_get_value();
-		
-			oscillator_set_amplitude(OSCILLATOR_A, amp_eg);
-			oscillator_set_amplitude(OSCILLATOR_B, amp_eg);
+			oscillator_set_amplitude(OSCILLATOR_A, ENVELOPE_A->value);
+			oscillator_set_amplitude(OSCILLATOR_B, ENVELOPE_B->value);
 			oscillator_set_frequency(OSCILLATOR_A, freqs[keyboard_get_note()]);
 			oscillator_set_frequency(OSCILLATOR_B, freqs[keyboard_get_note()]);//+freqs[keyboard_get_note()]/2);
 			update_pending = 0;

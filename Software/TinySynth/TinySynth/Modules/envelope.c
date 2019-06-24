@@ -8,44 +8,66 @@
 #include "envelope.h"
 #include "keyboard.h"
 
+static envelope_t _envelope_a;
+static envelope_t _envelope_b;
 
-static uint8_t envelope_value;
-
-uint8_t envelope_rise_speed;
-uint8_t envelope_fall_speed;
+envelope_t* const ENVELOPE_A = &_envelope_a;
+envelope_t* const ENVELOPE_B = &_envelope_b;
 
 
-void envelope_init(void)
+void envelope_init(envelope_t* envelope)
 {
-	envelope_value = 0;
+	envelope->value = 0;
+	envelope->state = EGSTATE_RELEASE;
+	envelope->attack_speed = 1;
+	envelope->decay_speed = 1;
+	envelope->sustain_value = 1;
+	envelope->release_speed = 1;
 }
 
 
-void envelope_update(void)
+void envelope_update(envelope_t* envelope)
 {
 	volatile uint8_t gate = keyboard_get_gate();
 	
-	if (gate && envelope_value < 255) {
-		if (envelope_value > 255 - envelope_rise_speed) {
-			envelope_value = 255;
-		}
-		else {
-			envelope_value += envelope_rise_speed;
-		}
+	if (!gate) {
+		envelope->state = EGSTATE_RELEASE;
 	}
 	
-	if (!gate && envelope_value > 0) {
-		if (envelope_value < envelope_fall_speed) {
-			envelope_value = 0;
-		} 
-		else {
-			envelope_value -= envelope_fall_speed;
-		}
+	if (gate && envelope->state == EGSTATE_RELEASE) {
+		envelope->state = EGSTATE_ATTACK;
 	}
-}
-
-
-uint8_t envelope_get_value(void)
-{
-	return envelope_value;
+	
+	switch (envelope->state)
+	{
+	case EGSTATE_ATTACK:
+		if (envelope->value <= 255 - envelope->attack_speed) {
+			envelope->value += envelope->attack_speed;
+		}
+		else {
+			envelope->value = 255;
+			envelope->state = EGSTATE_DECAY;
+		}
+		break;
+	case EGSTATE_DECAY:
+		if (envelope->value >= envelope->sustain_value + envelope->decay_speed) {
+			envelope->value -= envelope->decay_speed;
+		}
+		else {
+			envelope->value = envelope->sustain_value;
+			envelope->state = EGSTATE_SUSTAIN;
+		}
+		break;
+	case EGSTATE_SUSTAIN:
+		envelope->value = envelope->sustain_value;
+		break;
+	case EGSTATE_RELEASE:
+		if (envelope->value >= envelope->release_speed) {
+			envelope->value -= envelope->release_speed;
+		}
+		else {
+			envelope->value = 0;
+		}
+		break;
+	}
 }
