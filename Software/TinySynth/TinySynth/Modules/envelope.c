@@ -19,10 +19,11 @@ void envelope_init(envelope_t* envelope)
 {
 	envelope->value = 0;
 	envelope->state = EGSTATE_RELEASE;
-	envelope->attack_speed = 1;
-	envelope->decay_speed = 1;
-	envelope->sustain_value = 1;
-	envelope->release_speed = 1;
+	envelope->attack_speed = 255;
+	envelope->hold_time = 0;
+	envelope->decay_speed = 255;
+	envelope->sustain_value = 255;
+	envelope->release_speed = 255;
 }
 
 
@@ -45,6 +46,14 @@ void envelope_update(envelope_t* envelope)
 			envelope->value += envelope->attack_speed;
 		}
 		else {
+			envelope->value = 255;
+			envelope->state = EGSTATE_HOLD;
+			envelope->hold_timer = envelope->hold_time;
+		}
+		break;
+	case EGSTATE_HOLD:
+		envelope->hold_timer--;
+		if (envelope->hold_timer == 0) {
 			envelope->value = 255;
 			envelope->state = EGSTATE_DECAY;
 		}
