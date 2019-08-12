@@ -191,7 +191,40 @@ uint8_t _get_amplitude_for_wave(waveform_t waveform) {
 	}
 }
 
+uint8_t last32_A[32] = {0};
+int index_A = 0;
+uint8_t last32_B[32] = {0};
+int index_B = 0;
+
+static void update_dac() {
+	last32_A[index_A++] = oscillators[(int)OSCILLATOR_A].current_sample;
+	last32_B[index_B++] = oscillators[(int)OSCILLATOR_B].current_sample;
+	
+	index_A = index_A % 32;
+	index_B = index_B % 32;
+
+	volatile int16_t new_data =
+		(int16_t)oscillators[(int)OSCILLATOR_A].current_sample +
+		oscillators[(int)OSCILLATOR_B].current_sample;
+
+	if (new_data > MAX_SAMPLE) {
+		new_data = MAX_SAMPLE;
+	}
+	else if (new_data < MIN_SAMPLE) {
+		new_data = MIN_SAMPLE;
+	}
+
+	volatile uint8_t dac_data = (uint8_t)(0x80 + new_data);
+
+	DAC0.DATA = dac_data;
+}
+
 static void run_oscillator(oscillator_data_t* osc_data) {
+	if (*(osc_data->amplitude) == 0) {
+		osc_data->wave_index = 0;
+		osc_data->current_sample = 0;
+	}
+	
 	// Compute next sample value
 	volatile int16_t wave_sample;
 
@@ -218,39 +251,13 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 
 	osc_data->current_sample = (((int32_t)*(osc_data->amplitude) + 1) * _get_amplitude_for_wave(osc_data->waveform) * wave_sample + 0x8000) >> 16;
 
-	volatile int16_t new_data =
-		(int16_t)oscillators[(int)OSCILLATOR_A].current_sample +
-		oscillators[(int)OSCILLATOR_B].current_sample;
+	update_dac();
 
-	if (new_data > MAX_SAMPLE) {
-		new_data = MAX_SAMPLE;
-	}
-	else if (new_data < MIN_SAMPLE) {
-		new_data = MIN_SAMPLE;
-	}
+	// Compute current location within wave period
+	osc_data->wave_index += (1 << osc_data->octave);
+	if (osc_data->wave_index >= SAMPLES_PR_WAVE) {
+		osc_data->wave_index = 0;
 
-	volatile uint8_t dac_data = (uint8_t)(0x80 + new_data);
-
-	DAC0.DATA = dac_data;
-
-
-	if (osc_data == &oscillators[(int)OSCILLATOR_A]) {
-		// Compute current location within wave period
-		osc_data->wave_index += (1 << osc_data->octave);
-		if (osc_data->wave_index >= SAMPLES_PR_WAVE) {
-			osc_data->wave_index = 0;
-
-			// Sync oscillator B to oscillator A if enabled
-			if (oscillator_sync && osc_data == &oscillators[(int)OSCILLATOR_A]) {
-				oscillators[(int)OSCILLATOR_B].wave_index = 0;
-			}
-		}
-	}
-	else {
-		osc_data->wave_index += 3;
-		if (osc_data->wave_index >= SAMPLES_PR_WAVE) {
-			osc_data->wave_index -= SAMPLES_PR_WAVE;
-		}
 	}
 }
 

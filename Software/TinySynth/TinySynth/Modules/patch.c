@@ -40,6 +40,7 @@ static const patch_t default_patch = {
 	.oscB_octave = 1,
 	.oscB_wave = WAVE_SQUARE,
 	.oscB_detune = 128,
+	.oscA_enabled = true,
 	.oscB_enabled = false,
 	.glide = false,
 	.eg_rise_speed = EG_FAST_RISE_SPEED,
@@ -52,6 +53,7 @@ static const patch_t debug_patchA = {
 	.oscB_octave = 0,
 	.oscB_wave = WAVE_SQUARE,
 	.oscB_detune = DETUNE_STEP_0,
+	.oscA_enabled = true,
 	.oscB_enabled = true,
 	.glide = false,
 	.eg_rise_speed = EG_FAST_RISE_SPEED,
@@ -66,7 +68,7 @@ void _apply_patch(const patch_t* patch)
 	active_patch = *patch;
 
 	oscillator_set_octave(OSCILLATOR_A, active_patch.oscA_octave);
-	oscillator_set_waveform(OSCILLATOR_A, active_patch.oscA_wave);
+	oscillator_set_waveform(OSCILLATOR_A, active_patch.oscA_enabled ? active_patch.oscA_wave : WAVE_SILENCE);
 
 	oscillator_set_octave(OSCILLATOR_B, active_patch.oscB_octave);
 	oscillator_set_waveform(OSCILLATOR_B, active_patch.oscB_enabled ? active_patch.oscB_wave : WAVE_SILENCE);
@@ -104,7 +106,17 @@ void patch_init(void)
 
 void patch_cycle_oscA_octave(void)
 {
-	active_patch.oscA_octave = (active_patch.oscA_octave + 1) % 3;
+	if (!active_patch.oscA_enabled) {
+		active_patch.oscA_enabled = true;
+		active_patch.oscA_octave = 0;
+	}
+	else {
+		active_patch.oscA_octave++;
+		if (active_patch.oscA_octave > 2) {
+			active_patch.oscA_enabled = false;
+		}
+	}
+	//active_patch.oscA_octave = (active_patch.oscA_octave + 1) % 3;
 	_apply_patch(&active_patch);
 }
 
