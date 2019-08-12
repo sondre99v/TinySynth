@@ -43,17 +43,15 @@ int main(void)
 
 
 
-	uint16_t freqs[] = {
-		1746, 1850, 1960, 2077, 2200, 2331, 2469, 2616, 2772, 2937,
-		3111, 3296, 3492, 3700, 3920, 4153, 4400, 4662, 4939, 5233,
-	};
-
 	// Setup TCD0 to give a 100Hz interrupt
 	TCD0.CMPBCLR = TIME_TIMER_PERIOD;
 	TCD0.INTCTRL = TCD_OVF_bm;
 	TCD0.CTRLA = TCD_CNTPRES_DIV32_gc | TCD_ENABLE_bm;
 
 	oscillator_init();
+	oscillator_set_sources(OSCILLATOR_A, &keyboard_note, &(ENVELOPE_A->value));
+	oscillator_set_sources(OSCILLATOR_B, &keyboard_note, &(ENVELOPE_B->value));
+	
 	keyboard_init();
 	envelope_init(ENVELOPE_A);
 	envelope_init(ENVELOPE_B);
@@ -67,13 +65,10 @@ int main(void)
 		if (update_pending) {
 			patch_panel_update();
 			keyboard_update();
+			oscillator_update(OSCILLATOR_A);
+			oscillator_update(OSCILLATOR_B);
 			envelope_update(ENVELOPE_A);
 			envelope_update(ENVELOPE_B);
-
-			oscillator_set_amplitude(OSCILLATOR_A, ENVELOPE_A->value);
-			oscillator_set_amplitude(OSCILLATOR_B, ENVELOPE_B->value);
-			oscillator_set_frequency(OSCILLATOR_A, freqs[keyboard_get_note()]);
-			oscillator_set_frequency(OSCILLATOR_B, freqs[keyboard_get_note()]);//+freqs[keyboard_get_note()]/2);
 			update_pending = 0;
 		}
     }

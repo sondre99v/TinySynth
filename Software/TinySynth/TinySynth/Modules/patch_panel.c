@@ -21,7 +21,7 @@ typedef enum {
 	BUTTON_OSC2_OCT = 3,
 	BUTTON_OSC2_WAVE = 2,
 	BUTTON_OSC2_TUNE = 1,
-	BUTTON_SYNC = 0
+	BUTTON_GLIDE = 0
 } button_t;
 
 static button_t held_button;
@@ -106,8 +106,8 @@ void patch_panel_update(void)
 		case BUTTON_OSC2_TUNE:
 			patch_cycle_oscB_detune();
 			break;
-		case BUTTON_SYNC:
-			patch_toggle_sync();
+		case BUTTON_GLIDE:
+			patch_toggle_glide();
 			break;
 		default: break;
 	}
@@ -132,7 +132,7 @@ void patch_panel_set_led(patch_led_t led, uint8_t value)
 			_set_led(1, value & 0x1);
 			_set_led(2, value & 0x2);
 			break;
-		case PATCH_LED_SYNC:
+		case PATCH_LED_GLIDE:
 			_set_led(0, value & 0x1);
 			break;
 		case PATCH_LED_EG_RISE:

@@ -31,11 +31,12 @@ typedef enum {
 
 void oscillator_init(void);
 
+void oscillator_update(oscillator_t oscillator);
+void oscillator_set_sources(oscillator_t oscillator, uint8_t* note_input, uint8_t* amplitude_input);
 void oscillator_set_waveform(oscillator_t oscillator, waveform_t waveform);
-void oscillator_set_frequency(oscillator_t oscillator, uint16_t frequency_dHz);
-void oscillator_set_amplitude(oscillator_t oscillator, uint8_t amplitude);
 void oscillator_set_octave(oscillator_t oscillator, uint8_t octave);
 void oscillator_set_detune(oscillator_t oscillator, uint8_t detune);
 void oscillator_set_sync(bool enabled);
+void oscillator_set_sweep_speed(oscillator_t oscillator, uint16_t sweep_speed);
 
 #endif /* OSCILLATOR_H_ */

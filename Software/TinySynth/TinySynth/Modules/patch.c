@@ -18,6 +18,9 @@
 #define EG_FAST_FALL_SPEED 50
 #define EG_SLOW_FALL_SPEED 2
 
+#define GLIDE_ENABLED_SPEED 10
+#define GLIDE_DISABLED_SPEED 65535
+
 //   0 - Unison
 //  43 - Minor third
 //  51 - Major third
@@ -38,7 +41,7 @@ static const patch_t default_patch = {
 	.oscB_wave = WAVE_SQUARE,
 	.oscB_detune = 128,
 	.oscB_enabled = false,
-	.sync = false,
+	.glide = false,
 	.eg_rise_speed = EG_FAST_RISE_SPEED,
 	.eg_fall_speed = EG_SLOW_FALL_SPEED
 };
@@ -50,7 +53,7 @@ static const patch_t debug_patchA = {
 	.oscB_wave = WAVE_SQUARE,
 	.oscB_detune = DETUNE_STEP_0,
 	.oscB_enabled = true,
-	.sync = false,
+	.glide = false,
 	.eg_rise_speed = EG_FAST_RISE_SPEED,
 	.eg_fall_speed = EG_FAST_FALL_SPEED
 };
@@ -69,22 +72,26 @@ void _apply_patch(const patch_t* patch)
 	oscillator_set_waveform(OSCILLATOR_B, active_patch.oscB_enabled ? active_patch.oscB_wave : WAVE_SILENCE);
 
 	oscillator_set_detune(OSCILLATOR_B, active_patch.oscB_detune);
-	oscillator_set_sync(active_patch.sync);
+	
+	oscillator_set_sweep_speed(OSCILLATOR_A, active_patch.glide ? GLIDE_ENABLED_SPEED : GLIDE_DISABLED_SPEED);
+	oscillator_set_sweep_speed(OSCILLATOR_B, active_patch.glide ? GLIDE_ENABLED_SPEED : GLIDE_DISABLED_SPEED);
+	
 	ENVELOPE_A->attack_speed = active_patch.eg_rise_speed;
 	ENVELOPE_A->hold_time = 0;
 	ENVELOPE_A->decay_speed = 255;
 	ENVELOPE_A->sustain_value = 255;
 	ENVELOPE_A->release_speed = active_patch.eg_fall_speed;
-	ENVELOPE_B->attack_speed = 255;//active_patch.eg_rise_speed;
-	ENVELOPE_B->hold_time = 20;
+	
+	ENVELOPE_B->attack_speed = active_patch.eg_rise_speed;
+	ENVELOPE_B->hold_time = 0;
 	ENVELOPE_B->decay_speed = 255;
-	ENVELOPE_B->sustain_value = 0;
-	ENVELOPE_B->release_speed = 255;//active_patch.eg_fall_speed;
+	ENVELOPE_B->sustain_value = 255;
+	ENVELOPE_B->release_speed = active_patch.eg_fall_speed;
 
 	patch_panel_set_led(PATCH_LED_OSCA_WAVE, (uint8_t)active_patch.oscA_wave);
 	patch_panel_set_led(PATCH_LED_OSCB_ENABLED, (uint8_t)active_patch.oscB_enabled);
 	patch_panel_set_led(PATCH_LED_OSCB_WAVE, (uint8_t)active_patch.oscB_wave);
-	patch_panel_set_led(PATCH_LED_SYNC, (uint8_t)active_patch.sync);
+	patch_panel_set_led(PATCH_LED_GLIDE, (uint8_t)active_patch.glide);
 	patch_panel_set_led(PATCH_LED_EG_RISE, active_patch.eg_rise_speed < EG_FAST_RISE_SPEED ? 1 : 0);
 	patch_panel_set_led(PATCH_LED_EG_FALL, active_patch.eg_fall_speed < EG_FAST_FALL_SPEED ? 1 : 0);
 }
@@ -164,8 +171,8 @@ void patch_cycle_oscB_detune(void)
 	_apply_patch(&active_patch);
 }
 
-void patch_toggle_sync(void)
+void patch_toggle_glide(void)
 {
-	active_patch.sync = !active_patch.sync;
+	active_patch.glide = !active_patch.glide;
 	_apply_patch(&active_patch);
 }

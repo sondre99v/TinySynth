@@ -14,15 +14,18 @@
 typedef struct {
 	uint8_t value;
 	uint8_t attack_speed;
+	uint8_t hold_time;
 	uint8_t decay_speed;
 	uint8_t sustain_value;
 	uint8_t release_speed;
 	enum {
 		EGSTATE_ATTACK,
+		EGSTATE_HOLD,
 		EGSTATE_DECAY,
 		EGSTATE_SUSTAIN,
 		EGSTATE_RELEASE
 	} state;
+	uint8_t hold_timer;
 } envelope_t;
 
 extern envelope_t* const ENVELOPE_A;

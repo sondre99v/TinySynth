@@ -18,7 +18,7 @@ typedef struct {
 	waveform_t oscB_wave;
 	uint8_t oscB_detune;
 	bool oscB_enabled;
-	bool sync;
+	bool glide;
 	uint8_t eg_rise_speed;
 	uint8_t eg_fall_speed;
 } patch_t;
@@ -32,7 +32,7 @@ void patch_cycle_oscB_wave(void);
 void patch_toggle_eg_rise(void);
 void patch_toggle_eg_fall(void);
 void patch_cycle_oscB_detune(void);
-void patch_toggle_sync(void);
+void patch_toggle_glide(void);
 
 
 #endif /* PATCH_H_ */

@@ -50,7 +50,9 @@ static int8_t wave_noise_get_sample() {
 
 typedef struct {
 	waveform_t waveform;
-	uint8_t amplitude;
+	uint8_t* amplitude;
+	uint8_t* note;
+	uint16_t sweep_speed;
 	int16_t current_sample;
 	uint8_t wave_index;
 	uint16_t timer_period;
@@ -62,6 +64,8 @@ static oscillator_data_t oscillators[] = {
 	{
 		.waveform = WAVE_SILENCE,
 		.amplitude = 0,
+		.note = 0,
+		.sweep_speed = 65535,
 		.current_sample = 0,
 		.wave_index = 0,
 		.octave = 0,
@@ -71,6 +75,8 @@ static oscillator_data_t oscillators[] = {
 	{
 		.waveform = WAVE_SILENCE,
 		.amplitude = 0,
+		.note = 0,
+		.sweep_speed = 65535,
 		.current_sample = 0,
 		.wave_index = 0,
 		.octave = 0,
@@ -117,15 +123,41 @@ void oscillator_set_waveform(oscillator_t oscillator, waveform_t waveform)
 	}
 }
 
-void oscillator_set_frequency(oscillator_t oscillator, uint16_t frequency_dHz)
+const uint16_t freqs[] = {
+	1746, 1850, 1960, 2077, 2200, 2331, 2469, 2616, 2772, 2937,
+	3111, 3296, 3492, 3700, 3920, 4153, 4400, 4662, 4939, 5233,
+};
+
+void oscillator_update(oscillator_t oscillator)
 {
-	oscillators[(int)oscillator].timer_period =
-		MAIN_CLOCK_FREQUENCY_HZ * 10 / ((uint32_t)frequency_dHz * SAMPLES_PR_WAVE);
+	oscillator_data_t* osc = &oscillators[(int)oscillator];
+	
+	uint16_t current = osc->timer_period;
+	uint16_t target = MAIN_CLOCK_FREQUENCY_HZ * 10 / 
+		((uint32_t)freqs[*(osc->note)] * SAMPLES_PR_WAVE);
+	
+	if (target > current) {
+		if (target - current > osc->sweep_speed) {
+			osc->timer_period += osc->sweep_speed;
+		}
+		else {
+			osc->timer_period = target;
+		}
+	} 
+	else if (target < current) {
+		if (current - target > osc->sweep_speed) {
+			osc->timer_period -= osc->sweep_speed;
+		}
+		else {
+			osc->timer_period = target;
+		}
+	}
 }
 
-void oscillator_set_amplitude(oscillator_t oscillator, uint8_t amplitude)
+void oscillator_set_sources(oscillator_t oscillator, uint8_t* note_input, uint8_t* amplitude_input)
 {
-	oscillators[(int)oscillator].amplitude = amplitude;
+	oscillators[(int)oscillator].note = note_input;
+	oscillators[(int)oscillator].amplitude = amplitude_input;
 }
 
 void oscillator_set_octave(oscillator_t oscillator, uint8_t octave)
@@ -141,6 +173,11 @@ void oscillator_set_detune(oscillator_t oscillator, uint8_t detune)
 void oscillator_set_sync(bool enabled)
 {
 	oscillator_sync = enabled;
+}
+
+void oscillator_set_sweep_speed(oscillator_t oscillator, uint16_t sweep_speed)
+{
+	oscillators[(int)oscillator].sweep_speed = sweep_speed;
 }
 
 uint8_t _get_amplitude_for_wave(waveform_t waveform) {
@@ -179,7 +216,7 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 		break;
 	}
 
-	osc_data->current_sample = (((int32_t)osc_data->amplitude + 1) * _get_amplitude_for_wave(osc_data->waveform) * wave_sample + 0x8000) >> 16;
+	osc_data->current_sample = (((int32_t)*(osc_data->amplitude) + 1) * _get_amplitude_for_wave(osc_data->waveform) * wave_sample + 0x8000) >> 16;
 
 	volatile int16_t new_data =
 		(int16_t)oscillators[(int)OSCILLATOR_A].current_sample +
@@ -197,14 +234,22 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 	DAC0.DATA = dac_data;
 
 
-	// Compute current location within wave period
-	osc_data->wave_index += (1 << osc_data->octave);
-	if (osc_data->wave_index >= SAMPLES_PR_WAVE) {
-		osc_data->wave_index = 0;
+	if (osc_data == &oscillators[(int)OSCILLATOR_A]) {
+		// Compute current location within wave period
+		osc_data->wave_index += (1 << osc_data->octave);
+		if (osc_data->wave_index >= SAMPLES_PR_WAVE) {
+			osc_data->wave_index = 0;
 
-		// Sync oscillator B to oscillator A if enabled
-		if (oscillator_sync && osc_data == &oscillators[(int)OSCILLATOR_A]) {
-			oscillators[(int)OSCILLATOR_B].wave_index = 0;
+			// Sync oscillator B to oscillator A if enabled
+			if (oscillator_sync && osc_data == &oscillators[(int)OSCILLATOR_A]) {
+				oscillators[(int)OSCILLATOR_B].wave_index = 0;
+			}
+		}
+	}
+	else {
+		osc_data->wave_index += 3;
+		if (osc_data->wave_index >= SAMPLES_PR_WAVE) {
+			osc_data->wave_index -= SAMPLES_PR_WAVE;
 		}
 	}
 }

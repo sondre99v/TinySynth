@@ -12,6 +12,7 @@
 
 #include <stdint.h>
 
+extern uint8_t keyboard_note;
 
 void keyboard_init(void);
 void keyboard_update(void);
