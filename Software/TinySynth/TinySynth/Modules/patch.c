@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "envelope.h"
+#include "new_envelope.h"
 #include "patch_panel.h"
 
 #define EG_FAST_RISE_SPEED 255
@@ -78,17 +78,17 @@ void _apply_patch(const patch_t* patch)
 	oscillator_set_sweep_speed(OSCILLATOR_A, active_patch.glide ? GLIDE_ENABLED_SPEED : GLIDE_DISABLED_SPEED);
 	oscillator_set_sweep_speed(OSCILLATOR_B, active_patch.glide ? GLIDE_ENABLED_SPEED : GLIDE_DISABLED_SPEED);
 	
-	ENVELOPE_A->attack_speed = active_patch.eg_rise_speed;
-	ENVELOPE_A->hold_time = 0;
-	ENVELOPE_A->decay_speed = 255;
-	ENVELOPE_A->sustain_value = 255;
-	ENVELOPE_A->release_speed = active_patch.eg_fall_speed;
+	ENVELOPE_1->attack_speed = active_patch.eg_rise_speed;
+	ENVELOPE_1->hold_time = 0;
+	ENVELOPE_1->decay_speed = 255;
+	ENVELOPE_1->sustain_value = 255;
+	ENVELOPE_1->release_speed = active_patch.eg_fall_speed;
 	
-	ENVELOPE_B->attack_speed = active_patch.eg_rise_speed;
-	ENVELOPE_B->hold_time = 0;
-	ENVELOPE_B->decay_speed = 255;
-	ENVELOPE_B->sustain_value = 255;
-	ENVELOPE_B->release_speed = active_patch.eg_fall_speed;
+	ENVELOPE_2->attack_speed = active_patch.eg_rise_speed;
+	ENVELOPE_2->hold_time = 0;
+	ENVELOPE_2->decay_speed = 255;
+	ENVELOPE_2->sustain_value = 255;
+	ENVELOPE_2->release_speed = active_patch.eg_fall_speed;
 
 	patch_panel_set_led(PATCH_LED_OSCA_WAVE, (uint8_t)active_patch.oscA_wave);
 	patch_panel_set_led(PATCH_LED_OSCB_ENABLED, (uint8_t)active_patch.oscB_enabled);

@@ -139,18 +139,24 @@
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Modules\new_envelope.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Modules\new_envelope.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="Modules\patch_panel.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="Modules\patch_panel.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Modules\envelope.c">
+    <None Include="Modules\envelope.c">
       <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="Modules\envelope.h">
+    </None>
+    <None Include="Modules\envelope.h">
       <SubType>compile</SubType>
-    </Compile>
+    </None>
     <Compile Include="Modules\keyboard.c">
       <SubType>compile</SubType>
     </Compile>

@@ -9,6 +9,7 @@
 #include <avr/interrupt.h>
 
 #include "oscillator.h"
+#include "new_envelope.h"
 
 
 #define SAMPLES_PR_WAVE 16
@@ -53,7 +54,7 @@ typedef struct {
 	uint8_t* amplitude;
 	uint8_t* note;
 	uint16_t sweep_speed;
-	int16_t current_sample;
+	int8_t current_sample;
 	uint8_t wave_index;
 	uint16_t timer_period;
 	uint8_t octave;
@@ -113,14 +114,14 @@ void oscillator_set_waveform(oscillator_t oscillator, waveform_t waveform)
 {
 	oscillators[(int)oscillator].waveform = waveform;
 
-	if (waveform == WAVE_SILENCE) {
+/*	if (waveform == WAVE_SILENCE) {
 		if (oscillator == OSCILLATOR_A) TCA0.SINGLE.CTRLA &= ~TCA_SINGLE_ENABLE_bm;
 		if (oscillator == OSCILLATOR_B) TCB0.CTRLA &= ~TCB_ENABLE_bm;
 	}
 	else {
 		if (oscillator == OSCILLATOR_A) TCA0.SINGLE.CTRLA = TCA_SINGLE_ENABLE_bm;
 		if (oscillator == OSCILLATOR_B) TCB0.CTRLA = TCB_ENABLE_bm;
-	}
+	}*/
 }
 
 const uint16_t freqs[] = {
@@ -185,7 +186,7 @@ uint8_t _get_amplitude_for_wave(waveform_t waveform) {
 		case WAVE_SINE: return 0xD0;
 		case WAVE_TRIANGLE: return 0xC0;
 		case WAVE_SQUARE: return 0x80;
-		case WAVE_SAW: return 0x60;
+		case WAVE_SAW: return 0xC0;
 		case WAVE_NOISE: return 0x60;
 		default: return 0x00;
 	}
@@ -195,6 +196,8 @@ uint8_t last32_A[32] = {0};
 int index_A = 0;
 uint8_t last32_B[32] = {0};
 int index_B = 0;
+
+volatile uint8_t filter_cv = 0x80;
 
 static void update_dac() {
 	last32_A[index_A++] = oscillators[(int)OSCILLATOR_A].current_sample;
@@ -216,8 +219,10 @@ static void update_dac() {
 
 	volatile uint8_t dac_data = (uint8_t)(0x80 + new_data);
 
-	DAC0.DATA = dac_data;
+	DAC0.DATA = ((int16_t)DAC0.DATA * filter_cv + dac_data * (0x100 - filter_cv)) >> 8;
 }
+
+#define SCALE(v, x) (((int16_t)(v) * (x + 1) + 0x80) >> 8)
 
 static void run_oscillator(oscillator_data_t* osc_data) {
 	if (*(osc_data->amplitude) == 0) {
@@ -226,7 +231,7 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 	}
 	
 	// Compute next sample value
-	volatile int16_t wave_sample;
+	volatile int8_t wave_sample;
 
 	switch(osc_data->waveform) {
 		case WAVE_SAW:
@@ -249,7 +254,17 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 		break;
 	}
 
-	osc_data->current_sample = (((int32_t)*(osc_data->amplitude) + 1) * _get_amplitude_for_wave(osc_data->waveform) * wave_sample + 0x8000) >> 16;
+	//int16_t new_sample = 
+	//int16_t old_sample = osc_data->current_sample;
+
+	filter_cv = 0xFF - ENVELOPE_3->value;
+
+	uint8_t amp = *osc_data->amplitude;
+	uint8_t wave_amp = _get_amplitude_for_wave(osc_data->waveform);
+	amp = SCALE(amp, wave_amp);
+
+	osc_data->current_sample = SCALE(wave_sample, amp);
+
 
 	update_dac();
 
@@ -264,21 +279,33 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 // Interrupt handler for oscillator A
 ISR(TCA0_OVF_vect)
 {
+	PORTC.OUTSET = 1;
+
 	run_oscillator(&oscillators[(int)OSCILLATOR_A]);
 
 	TCA0.SINGLE.PER = oscillators[(int)OSCILLATOR_A].timer_period - (((uint32_t)oscillators[(int)OSCILLATOR_A].timer_period * oscillators[(int)OSCILLATOR_A].detune) >> 8);
 
 	// Clear interrupt flag
 	TCA0.SINGLE.INTFLAGS = TCA_SINGLE_OVF_bm;
+	
+	PORTC.OUTCLR = 1;
 }
 
 // Interrupt handler for oscillator B
 ISR(TCB0_INT_vect)
 {
+	PORTC.OUTSET = 1;
+	PORTC.OUTCLR = 1;
+	PORTC.OUTSET = 1;
+
 	run_oscillator(&oscillators[(int)OSCILLATOR_B]);
 
 	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period - (((uint32_t)oscillators[(int)OSCILLATOR_B].timer_period * oscillators[(int)OSCILLATOR_B].detune) >> 8);;
 
 	// Clear interrupt flag
 	TCB0.INTFLAGS = TCB_CAPT_bm;
+	
+	PORTC.OUTCLR = 1;
+	PORTC.OUTSET = 1;
+	PORTC.OUTCLR = 1;
 }
