@@ -425,23 +425,21 @@ Text Label 9700 5600 0    50   ~ 0
 KeyGb1
 Text Label 9700 5700 0    50   ~ 0
 KeyF1
-Text Label 10650 1100 0    50   ~ 0
+Text Label 10650 1000 0    50   ~ 0
 StylusGND
 Wire Wire Line
-	11000 1100 10650 1100
+	11000 1000 10650 1000
 $Comp
 L power:GND #PWR0103
 U 1 1 5CAD8391
-P 10400 1100
-F 0 "#PWR0103" H 10400 850 50  0001 C CNN
-F 1 "GND" H 10405 927 50  0000 C CNN
-F 2 "" H 10400 1100 50  0001 C CNN
-F 3 "" H 10400 1100 50  0001 C CNN
-	1    10400 1100
+P 10650 1550
+F 0 "#PWR0103" H 10650 1300 50  0001 C CNN
+F 1 "GND" H 10655 1377 50  0000 C CNN
+F 2 "" H 10650 1550 50  0001 C CNN
+F 3 "" H 10650 1550 50  0001 C CNN
+	1    10650 1550
 	1    0    0    -1  
 $EndComp
-Wire Notes Line
-	10650 1100 10400 1100
 $Comp
 L Device:R R21
 U 1 1 5CA2F499
@@ -761,7 +759,7 @@ U 1 1 5CA81333
 P 6650 3300
 F 0 "U2" H 6250 3650 50  0000 C CNN
 F 1 "IS31AP4991A" H 6350 2950 50  0000 C CNN
-F 2 "BusinessSynth:SOP-8_3.76x4.96mm_P1.27mm_nosilk" H 6650 3700 50  0001 C CNN
+F 2 "BusinessSynth:MSOP-8-1EP_3x3mm_P0.65mm_nosilk" H 6650 3700 50  0001 C CNN
 F 3 "" H 6650 3700 50  0001 C CNN
 	1    6650 3300
 	1    0    0    -1  
@@ -1269,6 +1267,39 @@ F 1 "ATtiny817-M" H 3400 4340 50  0000 C CNN
 F 2 "BusinessSynth:QFN-24-1EP_4x4mm_P0.5mm_EP2.6x2.6mm_nosilk" H 3400 3150 50  0001 C CIN
 F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/40001901B.pdf" H 3400 3150 50  0001 C CNN
 	1    3400 3150
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole_Pad H2
+U 1 1 5D641935
+P 10650 1450
+F 0 "H2" H 10750 1499 50  0000 L CNN
+F 1 "Stylus" H 10750 1408 50  0000 L CNN
+F 2 "Connector_Wire:SolderWirePad_1x01_Drill0.8mm" H 10650 1450 50  0001 C CNN
+F 3 "~" H 10650 1450 50  0001 C CNN
+	1    10650 1450
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole_Pad H1
+U 1 1 5D663F95
+P 10650 1100
+F 0 "H1" H 10550 1057 50  0000 R CNN
+F 1 "Stylus" H 10550 1148 50  0000 R CNN
+F 2 "Connector_Wire:SolderWirePad_1x01_Drill0.8mm" H 10650 1100 50  0001 C CNN
+F 3 "~" H 10650 1100 50  0001 C CNN
+	1    10650 1100
+	-1   0    0    1   
+$EndComp
+$Comp
+L Mechanical:MountingHole H3
+U 1 1 5D67C8D8
+P 10450 1400
+F 0 "H3" H 10550 1446 50  0000 L CNN
+F 1 "Strain relief" H 10550 1355 50  0000 L CNN
+F 2 "MountingHole:MountingHole_2.1mm" H 10450 1400 50  0001 C CNN
+F 3 "~" H 10450 1400 50  0001 C CNN
+	1    10450 1400
 	1    0    0    -1  
 $EndComp
 $EndSCHEMATC
