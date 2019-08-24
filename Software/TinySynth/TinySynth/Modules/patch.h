@@ -17,6 +17,7 @@ typedef struct {
 	uint8_t oscB_octave;
 	waveform_t oscB_wave;
 	uint8_t oscB_detune;
+	bool oscA_enabled;
 	bool oscB_enabled;
 	bool glide;
 	uint8_t eg_rise_speed;

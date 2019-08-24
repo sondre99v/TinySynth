@@ -11,7 +11,7 @@
 
 
 volatile static uint8_t note_value;
-volatile static uint8_t gate_value;
+volatile uint8_t gate_value;
 volatile static uint8_t gate_pulse_timer = 0;
 
 uint8_t keyboard_note;
