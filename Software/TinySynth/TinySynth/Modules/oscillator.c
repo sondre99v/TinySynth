@@ -59,6 +59,9 @@ typedef struct {
 	uint16_t timer_period;
 	uint8_t octave;
 	uint8_t detune;
+	uint8_t filter_value;
+	uint8_t* filter_mod_source;
+	uint8_t filter_mod_amount;
 } oscillator_data_t;
 
 static oscillator_data_t oscillators[] = {
@@ -71,7 +74,10 @@ static oscillator_data_t oscillators[] = {
 		.wave_index = 0,
 		.octave = 0,
 		.timer_period = 2000,
-		.detune = 0
+		.detune = 0,
+		.filter_value = 0,
+		.filter_mod_source = 0,
+		.filter_mod_amount = 255
 	},
 	{
 		.waveform = WAVE_SILENCE,
@@ -82,7 +88,10 @@ static oscillator_data_t oscillators[] = {
 		.wave_index = 0,
 		.octave = 0,
 		.timer_period = 2000,
-		.detune = 0
+		.detune = 0,
+		.filter_value = 0,
+		.filter_mod_source = 0,
+		.filter_mod_amount = 255
 	}
 };
 
@@ -108,20 +117,14 @@ void oscillator_init(void)
 	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period;
 	TCB0.INTCTRL = TCB_CAPT_bm;
 	TCB0.CTRLA = TCB_ENABLE_bm;
+	
+	oscillators[0].filter_mod_source = &(ENVELOPE_3->value);
+	oscillators[1].filter_mod_source = &(ENVELOPE_3->value);
 }
 
 void oscillator_set_waveform(oscillator_t oscillator, waveform_t waveform)
 {
 	oscillators[(int)oscillator].waveform = waveform;
-
-/*	if (waveform == WAVE_SILENCE) {
-		if (oscillator == OSCILLATOR_A) TCA0.SINGLE.CTRLA &= ~TCA_SINGLE_ENABLE_bm;
-		if (oscillator == OSCILLATOR_B) TCB0.CTRLA &= ~TCB_ENABLE_bm;
-	}
-	else {
-		if (oscillator == OSCILLATOR_A) TCA0.SINGLE.CTRLA = TCA_SINGLE_ENABLE_bm;
-		if (oscillator == OSCILLATOR_B) TCB0.CTRLA = TCB_ENABLE_bm;
-	}*/
 }
 
 const uint16_t freqs[] = {
@@ -192,20 +195,7 @@ uint8_t _get_amplitude_for_wave(waveform_t waveform) {
 	}
 }
 
-uint8_t last32_A[32] = {0};
-int index_A = 0;
-uint8_t last32_B[32] = {0};
-int index_B = 0;
-
-volatile uint8_t filter_cv = 0x80;
-
 static void update_dac() {
-	last32_A[index_A++] = oscillators[(int)OSCILLATOR_A].current_sample;
-	last32_B[index_B++] = oscillators[(int)OSCILLATOR_B].current_sample;
-	
-	index_A = index_A % 32;
-	index_B = index_B % 32;
-
 	volatile int16_t new_data =
 		(int16_t)oscillators[(int)OSCILLATOR_A].current_sample +
 		oscillators[(int)OSCILLATOR_B].current_sample;
@@ -217,12 +207,14 @@ static void update_dac() {
 		new_data = MIN_SAMPLE;
 	}
 
-	volatile uint8_t dac_data = (uint8_t)(0x80 + new_data);
-
-	DAC0.DATA = ((int16_t)DAC0.DATA * filter_cv + dac_data * (0x100 - filter_cv)) >> 8;
+	DAC0.DATA = (uint8_t)(0x80 + new_data);
+	
+	if (new_data != 0) {
+		(void)new_data;
+	}
 }
 
-#define SCALE(v, x) (((int16_t)(v) * (x + 1) + 0x80) >> 8)
+#define SCALE(v, x) (( (int16_t)(v) * (x) + (v) + 0x80) >> 8)
 
 static void run_oscillator(oscillator_data_t* osc_data) {
 	if (*(osc_data->amplitude) == 0) {
@@ -257,13 +249,24 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 	//int16_t new_sample = 
 	//int16_t old_sample = osc_data->current_sample;
 
-	filter_cv = 0xFF - ENVELOPE_3->value;
-
+	// Combine set amplitude and waveform amplitude correction
 	uint8_t amp = *osc_data->amplitude;
 	uint8_t wave_amp = _get_amplitude_for_wave(osc_data->waveform);
 	amp = SCALE(amp, wave_amp);
 
-	osc_data->current_sample = SCALE(wave_sample, amp);
+	// Compute new sample
+	int8_t new_sample = SCALE(wave_sample, amp);
+	
+	// Apply filter to compute actual sample
+	volatile int16_t filter = (int16_t)osc_data->filter_value + (((int16_t)*(osc_data->filter_mod_source) << 1) >> 1);
+	if (filter > 255) {
+		filter = 255;
+	}
+	if (filter < 0) {
+		filter = 0;
+	}
+	
+	osc_data->current_sample = ((int16_t)new_sample * (uint8_t)filter + osc_data->current_sample * (0x100 - (uint8_t)filter)) >> 8;
 
 
 	update_dac();
@@ -279,33 +282,25 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 // Interrupt handler for oscillator A
 ISR(TCA0_OVF_vect)
 {
-	PORTC.OUTSET = 1;
-
 	run_oscillator(&oscillators[(int)OSCILLATOR_A]);
 
 	TCA0.SINGLE.PER = oscillators[(int)OSCILLATOR_A].timer_period - (((uint32_t)oscillators[(int)OSCILLATOR_A].timer_period * oscillators[(int)OSCILLATOR_A].detune) >> 8);
 
+	volatile __attribute__((unused)) int16_t margin = TCA0.SINGLE.PER - TCA0.SINGLE.CNT;
+
 	// Clear interrupt flag
 	TCA0.SINGLE.INTFLAGS = TCA_SINGLE_OVF_bm;
-	
-	PORTC.OUTCLR = 1;
 }
 
 // Interrupt handler for oscillator B
 ISR(TCB0_INT_vect)
 {
-	PORTC.OUTSET = 1;
-	PORTC.OUTCLR = 1;
-	PORTC.OUTSET = 1;
-
 	run_oscillator(&oscillators[(int)OSCILLATOR_B]);
 
 	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period - (((uint32_t)oscillators[(int)OSCILLATOR_B].timer_period * oscillators[(int)OSCILLATOR_B].detune) >> 8);;
 
+	volatile __attribute__((unused)) int16_t margin = TCB0.CCMP - TCB0.CNT;
+
 	// Clear interrupt flag
 	TCB0.INTFLAGS = TCB_CAPT_bm;
-	
-	PORTC.OUTCLR = 1;
-	PORTC.OUTSET = 1;
-	PORTC.OUTCLR = 1;
 }
