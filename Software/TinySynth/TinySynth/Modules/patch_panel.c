@@ -113,7 +113,7 @@ void patch_panel_update(void)
 	}
 
 	if (button_event != BUTTON_NONE) {
-		keyboard_pulse_gate();
+		keyboard_pulse_gate(KEYBOARD_1);
 		button_holdoff_timer = 50;
 	}
 }

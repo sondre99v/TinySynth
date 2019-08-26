@@ -12,15 +12,18 @@
 
 #include <stdint.h>
 
-extern uint8_t keyboard_note;
+typedef struct {
+	uint8_t note_value;
+	uint8_t gate_value;
+} keyboard_t;
 
-void keyboard_init(void);
-void keyboard_update(void);
 
-uint8_t keyboard_get_note(void);
-uint8_t keyboard_get_gate(void);
+extern keyboard_t* const KEYBOARD_1;
 
-void keyboard_pulse_gate(void);
+void keyboard_init(keyboard_t* keyboard);
+void keyboard_update(keyboard_t* keyboard);
+
+void keyboard_pulse_gate(keyboard_t* keyboard);
 
 
 #endif /* KEYBOARD_H_ */

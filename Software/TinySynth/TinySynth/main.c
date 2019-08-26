@@ -51,16 +51,16 @@ int main(void)
 	TCD0.CTRLA = TCD_CNTPRES_DIV32_gc | TCD_ENABLE_bm;
 
 	oscillator_init();
-	oscillator_set_sources(OSCILLATOR_A, &keyboard_note, &(ENVELOPE_1->value));
-	oscillator_set_sources(OSCILLATOR_B, &keyboard_note, &(ENVELOPE_2->value));
+	oscillator_set_sources(OSCILLATOR_A, &(KEYBOARD_1->note_value), &(ENVELOPE_1->value));
+	oscillator_set_sources(OSCILLATOR_B, &(KEYBOARD_1->note_value), &(ENVELOPE_2->value));
 	
-	keyboard_init();
+	keyboard_init(KEYBOARD_1);
 	envelope_init(ENVELOPE_1);
 	envelope_init(ENVELOPE_2);
 	envelope_init(ENVELOPE_3);
-	ENVELOPE_1->gate_source = &gate_value;
-	ENVELOPE_2->gate_source = &gate_value;
-	ENVELOPE_3->gate_source = &ENVELOPE_2->value;
+	ENVELOPE_1->gate_source = &(KEYBOARD_1->gate_value);
+	ENVELOPE_2->gate_source = &(KEYBOARD_1->gate_value);
+	ENVELOPE_3->gate_source = &(KEYBOARD_1->gate_value);
 	ENVELOPE_3->attack_speed = 0xFF;
 	ENVELOPE_3->hold_time = 0;
 	ENVELOPE_3->decay_speed = 0x3;
@@ -80,7 +80,7 @@ int main(void)
     {
 		if (update_pending) {
 			patch_panel_update();
-			keyboard_update();
+			keyboard_update(KEYBOARD_1);
 			oscillator_update(OSCILLATOR_A);
 			oscillator_update(OSCILLATOR_B);
 			envelope_update(ENVELOPE_1);

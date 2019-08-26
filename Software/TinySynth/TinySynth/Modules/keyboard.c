@@ -10,14 +10,16 @@
 #include <avr/io.h>
 
 
-volatile static uint8_t note_value;
-volatile uint8_t gate_value;
-volatile static uint8_t gate_pulse_timer = 0;
+typedef struct {
+	keyboard_t public;
+	uint8_t gate_pulse_timer;
+} keyboard_data_t;
 
-uint8_t keyboard_note;
-
-
-void keyboard_init(void)
+static keyboard_data_t KEYBOARD_DATA_1 = {0};
+	
+keyboard_t* const KEYBOARD_1 = (keyboard_t*)&KEYBOARD_DATA_1;
+	
+void keyboard_init(keyboard_t* keyboard)
 {
 	ADC0.CTRLA = ADC_RESSEL_8BIT_gc | ADC_ENABLE_bm;
 	ADC0.CTRLC = ADC_SAMPCAP_bm | ADC_REFSEL_VDDREF_gc | ADC_PRESC_DIV64_gc;
@@ -28,8 +30,10 @@ static const uint8_t thresholds[20] = {
 	8, 24, 37, 49, 62, 76, 88, 100, 113, 126, 139, 152, 164, 177, 191, 202, 213, 224, 236, 249
 };
 
-void keyboard_update(void)
+void keyboard_update(keyboard_t* keyboard)
 {
+	keyboard_data_t* data = (keyboard_data_t*)keyboard;
+	
 	ADC0.INTFLAGS = ADC_RESRDY_bm;
 	ADC0.COMMAND = ADC_STCONV_bm;
 	while (!(ADC0.INTFLAGS & ADC_RESRDY_bm)) { }
@@ -44,34 +48,21 @@ void keyboard_update(void)
 	index = 19 - index;
 
 	if (index >= 0) {
-		note_value = index;
-		gate_value = 1;
+		data->public.note_value = index;
+		data->public.gate_value = 1;
 	}
 	else {
-		gate_value = 0;
+		data->public.gate_value = 0;
 	}
 
-	if (gate_pulse_timer > 0) {
-		gate_value = 1;
-		gate_pulse_timer--;
+	if (data->gate_pulse_timer > 0) {
+		data->public.gate_value = 1;
+		data->gate_pulse_timer--;
 	}
-	
-	keyboard_note = note_value;
 }
 
-
-uint8_t keyboard_get_note(void)
+void keyboard_pulse_gate(keyboard_t* keyboard)
 {
-	return note_value;
-}
-
-
-uint8_t keyboard_get_gate(void)
-{
-	return gate_value;
-}
-
-void keyboard_pulse_gate(void)
-{
-	gate_pulse_timer = 100;
+	keyboard_data_t* data = (keyboard_data_t*)keyboard;
+	data->gate_pulse_timer = 100;
 }
