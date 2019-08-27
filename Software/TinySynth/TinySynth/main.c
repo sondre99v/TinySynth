@@ -62,11 +62,11 @@ int main(void)
 	ENVELOPE_2->gate_source = &(KEYBOARD_1->gate_value);
 	ENVELOPE_3->gate_source = &(KEYBOARD_1->gate_value);
 	
-	ENVELOPE_3->attack_speed = 0x3;
+	ENVELOPE_3->attack_speed = 0xFF;
 	ENVELOPE_3->hold_time = 0;
-	ENVELOPE_3->decay_speed = 0x3;
+	ENVELOPE_3->decay_speed = 0x5;
 	ENVELOPE_3->sustain_value = 0x00;
-	ENVELOPE_3->release_speed = 0;
+	ENVELOPE_3->release_speed = 0x5;
 	
 	patch_panel_init();
 	patch_init();

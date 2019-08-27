@@ -61,7 +61,7 @@ typedef struct {
 	uint8_t detune;
 	uint8_t filter_value;
 	uint8_t* filter_mod_source;
-	uint8_t filter_mod_amount;
+	int8_t filter_mod_amount;
 } oscillator_data_t;
 
 static oscillator_data_t oscillators[] = {
@@ -75,9 +75,9 @@ static oscillator_data_t oscillators[] = {
 		.octave = 0,
 		.timer_period = 2000,
 		.detune = 0,
-		.filter_value = 0,
+		.filter_value = 32,
 		.filter_mod_source = 0,
-		.filter_mod_amount = 255
+		.filter_mod_amount = 127
 	},
 	{
 		.waveform = WAVE_SILENCE,
@@ -89,9 +89,9 @@ static oscillator_data_t oscillators[] = {
 		.octave = 0,
 		.timer_period = 2000,
 		.detune = 0,
-		.filter_value = 0,
+		.filter_value = 32,
 		.filter_mod_source = 0,
-		.filter_mod_amount = 255
+		.filter_mod_amount = 127
 	}
 };
 
@@ -196,10 +196,12 @@ uint8_t _get_amplitude_for_wave(waveform_t waveform) {
 }
 
 static void update_dac() {
+	// Combine oscA and oscB
 	volatile int16_t new_data =
 		(int16_t)oscillators[(int)OSCILLATOR_A].current_sample +
 		oscillators[(int)OSCILLATOR_B].current_sample;
 
+	// Clamp output
 	if (new_data > MAX_SAMPLE) {
 		new_data = MAX_SAMPLE;
 	}
@@ -207,14 +209,26 @@ static void update_dac() {
 		new_data = MIN_SAMPLE;
 	}
 
+	// Apply output to DAC
 	DAC0.DATA = (uint8_t)(0x80 + new_data);
-	
-	if (new_data != 0) {
-		(void)new_data;
-	}
 }
 
 #define SCALE(v, x) (( (int16_t)(v) * (x) + (v) + 0x80) >> 8)
+
+static uint8_t modulate(uint8_t base_value, uint8_t mod_value, int8_t mod_amount) {
+	
+	int16_t mod = (mod_value * mod_amount + mod_value * (mod_amount > 0) + 0x7F) >> 7;
+	
+	if (base_value + mod > 255) {
+		return 255;
+	}
+	else if (base_value + mod < 0) {
+		return 0;
+	}
+	else {
+		return base_value + mod;
+	}
+}
 
 static void run_oscillator(oscillator_data_t* osc_data) {
 	if (*(osc_data->amplitude) == 0) {
@@ -246,9 +260,6 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 		break;
 	}
 
-	//int16_t new_sample = 
-	//int16_t old_sample = osc_data->current_sample;
-
 	// Combine set amplitude and waveform amplitude correction
 	uint8_t amp = *osc_data->amplitude;
 	uint8_t wave_amp = _get_amplitude_for_wave(osc_data->waveform);
@@ -256,17 +267,11 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 
 	// Compute new sample
 	int8_t new_sample = SCALE(wave_sample, amp);
-	
+
 	// Apply filter to compute actual sample
-	volatile int16_t filter = (int16_t)osc_data->filter_value + (((int16_t)*(osc_data->filter_mod_source) << 1) >> 1);
-	if (filter > 255) {
-		filter = 255;
-	}
-	if (filter < 0) {
-		filter = 0;
-	}
-	
-	osc_data->current_sample = ((int16_t)new_sample * (uint8_t)filter + osc_data->current_sample * (0x100 - (uint8_t)filter)) >> 8;
+	volatile uint8_t filter = modulate(osc_data->filter_value, *(osc_data->filter_mod_source), osc_data->filter_mod_amount);
+
+	osc_data->current_sample = ((int16_t)new_sample * filter + (int16_t)osc_data->current_sample * (0x100 - (uint8_t)filter)) >> 8;
 
 
 	update_dac();
