@@ -139,6 +139,9 @@
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Modules\module_utils.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="Modules\new_envelope.c">
       <SubType>compile</SubType>
     </Compile>
@@ -151,12 +154,6 @@
     <Compile Include="Modules\patch_panel.h">
       <SubType>compile</SubType>
     </Compile>
-    <None Include="Modules\envelope.c">
-      <SubType>compile</SubType>
-    </None>
-    <None Include="Modules\envelope.h">
-      <SubType>compile</SubType>
-    </None>
     <Compile Include="Modules\keyboard.c">
       <SubType>compile</SubType>
     </Compile>
