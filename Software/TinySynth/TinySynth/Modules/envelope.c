@@ -1,11 +1,11 @@
 /*
- * new_envelope.c
+ * envelope.c
  *
  * Created: 12/08/19 22:04:41
  *  Author: Sondre
  */ 
 
-#include "new_envelope.h"
+#include "envelope.h"
 #include <stdlib.h>
 
 typedef struct {

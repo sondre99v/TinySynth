@@ -1,13 +1,13 @@
 /*
- * new_envelope.h
+ * envelope.h
  *
  * Created: 12/08/19 22:02:02
  *  Author: Sondre
  */ 
 
 
-#ifndef NEW_ENVELOPE_H_
-#define NEW_ENVELOPE_H_
+#ifndef ENVELOPE_H_
+#define ENVELOPE_H_
 
 #include <stdint.h>
 
@@ -33,4 +33,4 @@ void envelope_update(envelope_t* envelope);
 uint8_t envelope_get_value();
 
 
-#endif /* NEW_ENVELOPE_H_ */
+#endif /* ENVELOPE_H_ */

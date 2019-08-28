@@ -10,7 +10,7 @@
 
 #include "Modules/oscillator.h"
 #include "Modules/keyboard.h"
-#include "Modules/new_envelope.h"
+#include "Modules/envelope.h"
 #include "Modules/patch_panel.h"
 #include "Modules/patch.h"
 

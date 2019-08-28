@@ -9,7 +9,7 @@
 #include <avr/interrupt.h>
 
 #include "oscillator.h"
-#include "new_envelope.h"
+#include "envelope.h"
 
 
 #define SAMPLES_PR_WAVE 16

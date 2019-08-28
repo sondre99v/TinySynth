@@ -142,10 +142,10 @@
     <Compile Include="Modules\module_utils.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Modules\new_envelope.c">
+    <Compile Include="Modules\envelope.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Modules\new_envelope.h">
+    <Compile Include="Modules\envelope.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="Modules\patch_panel.c">
