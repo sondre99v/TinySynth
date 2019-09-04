@@ -64,6 +64,8 @@ void envelope_update(envelope_t* envelope)
 		}
 	}
 
+	uint16_t release_speed;
+
 	switch (eg_data->state)
 	{
 		case EGSTATE_ATTACK:
@@ -98,8 +100,15 @@ void envelope_update(envelope_t* envelope)
 			eg_data->public.value = eg_data->public.sustain_value;
 			break;
 		case EGSTATE_RELEASE:
-			if (eg_data->public.value >= eg_data->public.release_speed) {
-				eg_data->public.value -= eg_data->public.release_speed;
+			// Make sure the dacay to the sustain level is not made slower if the gate falls during decay
+			release_speed = eg_data->public.release_speed;
+			if (eg_data->public.value > eg_data->public.sustain_value) {
+				release_speed += eg_data->public.decay_speed;
+				if (release_speed > 0xFF) release_speed = 0xFF;
+			}
+			
+			if (eg_data->public.value >= (uint8_t)release_speed) {
+				eg_data->public.value -= (uint8_t)release_speed;
 			}
 			else {
 				eg_data->public.value = 0;
