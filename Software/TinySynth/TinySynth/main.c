@@ -10,7 +10,7 @@
 
 #include "Modules/oscillator.h"
 #include "Modules/keyboard.h"
-#include "Modules/new_envelope.h"
+#include "Modules/envelope.h"
 #include "Modules/patch_panel.h"
 #include "Modules/patch.h"
 
@@ -61,19 +61,16 @@ int main(void)
 	ENVELOPE_1->gate_source = &(KEYBOARD_1->gate_value);
 	ENVELOPE_2->gate_source = &(KEYBOARD_1->gate_value);
 	ENVELOPE_3->gate_source = &(KEYBOARD_1->gate_value);
+	
 	ENVELOPE_3->attack_speed = 0xFF;
 	ENVELOPE_3->hold_time = 0;
-	ENVELOPE_3->decay_speed = 0x3;
-	ENVELOPE_3->sustain_value = 0x40;
-	ENVELOPE_3->release_speed = 0;
+	ENVELOPE_3->decay_speed = 0x5;
+	ENVELOPE_3->sustain_value = 0x00;
+	ENVELOPE_3->release_speed = 0x5;
+	
 	patch_panel_init();
 	patch_init();
-
 	
-	oscillator_set_waveform(OSCILLATOR_A, WAVE_SAW);
-	oscillator_set_waveform(OSCILLATOR_B, WAVE_SILENCE);
-	
-
 	sei();
 
 	while (1)

@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "new_envelope.h"
+#include "envelope.h"
 #include "patch_panel.h"
 
 #define EG_FAST_RISE_SPEED 255
