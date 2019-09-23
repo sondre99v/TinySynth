@@ -1149,19 +1149,6 @@ F 3 "" H 1000 4450 50  0001 C CNN
 	1    1000 4450
 	-1   0    0    -1  
 $EndComp
-Wire Wire Line
-	4200 2350 4200 2150
-$Comp
-L BusinessSynth:StylusKey J1
-U 1 1 5CABA3B5
-P 4300 2150
-F 0 "J1" H 4172 2201 50  0000 R CNN
-F 1 "StylusKey" H 4172 2110 50  0000 R CNN
-F 2 "BusinessSynth:StylusKey" H 4200 2150 50  0001 C CNN
-F 3 "" H 4200 2150 50  0001 C CNN
-	1    4300 2150
-	-1   0    0    -1  
-$EndComp
 Text Label 4700 2450 2    50   ~ 0
 Led7
 Text Label 4700 2550 2    50   ~ 0
@@ -1302,4 +1289,47 @@ F 3 "~" H 10450 1400 50  0001 C CNN
 	1    10450 1400
 	1    0    0    -1  
 $EndComp
+$Comp
+L Connector:Conn_01x03_Female J1
+U 1 1 5D8E9631
+P 4400 1800
+F 0 "J1" H 4428 1826 50  0000 L CNN
+F 1 "UPDI" H 4428 1735 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" H 4400 1800 50  0001 C CNN
+F 3 "~" H 4400 1800 50  0001 C CNN
+	1    4400 1800
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4200 1900 4200 2350
+$Comp
+L power:GND #PWR?
+U 1 1 5D8F5E83
+P 4050 1850
+F 0 "#PWR?" H 4050 1600 50  0001 C CNN
+F 1 "GND" H 4055 1677 50  0000 C CNN
+F 2 "" H 4050 1850 50  0001 C CNN
+F 3 "" H 4050 1850 50  0001 C CNN
+	1    4050 1850
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VDD #PWR?
+U 1 1 5D8F62AA
+P 4050 1650
+F 0 "#PWR?" H 4050 1500 50  0001 C CNN
+F 1 "VDD" H 4067 1823 50  0000 C CNN
+F 2 "" H 4050 1650 50  0001 C CNN
+F 3 "" H 4050 1650 50  0001 C CNN
+	1    4050 1650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4050 1650 4050 1700
+Wire Wire Line
+	4050 1700 4200 1700
+Wire Wire Line
+	4200 1800 4050 1800
+Wire Wire Line
+	4050 1800 4050 1850
 $EndSCHEMATC
