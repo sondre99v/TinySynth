@@ -17,22 +17,10 @@
 #define TIME_TIMER_PERIOD 6250 // Gives 100Hz frequency with 20MHz clock and 32x prescaler
 
 volatile static uint8_t update_pending = 0;
-uint8_t led_pwm_counter = 0;
 
 ISR(TCD0_OVF_vect) {
 	TCD0.INTFLAGS = 0x01;
 	update_pending = 1;
-
-	led_pwm_counter = (led_pwm_counter + 1) % 4;
-
-	if (led_pwm_counter == 0) {
-		PORTC.DIRSET = 0xFE;
-		PORTA.DIRSET = 0x06;
-	}
-	else {
-		PORTC.DIRCLR = 0xFE;
-		PORTA.DIRCLR = 0x06;
-	}
 }
 
 extern uint8_t gate_value;
@@ -61,12 +49,6 @@ int main(void)
 	ENVELOPE_1->gate_source = &(KEYBOARD_1->gate_value);
 	ENVELOPE_2->gate_source = &(KEYBOARD_1->gate_value);
 	ENVELOPE_3->gate_source = &(KEYBOARD_1->gate_value);
-	
-	ENVELOPE_3->attack_speed = 0xFF;
-	ENVELOPE_3->hold_time = 0;
-	ENVELOPE_3->decay_speed = 0x5;
-	ENVELOPE_3->sustain_value = 0x00;
-	ENVELOPE_3->release_speed = 0x5;
 	
 	patch_panel_init();
 	patch_init();
