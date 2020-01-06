@@ -46,9 +46,10 @@ void keyboard_update(keyboard_t* keyboard)
 	}
 
 	index = 19 - index;
+	uint8_t note = index + 53;
 
 	if (index >= 0) {
-		data->public.note_value = index;
+		data->public.note_value = note;
 		data->public.gate_value = 1;
 	}
 	else {

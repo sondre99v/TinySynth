@@ -127,9 +127,19 @@ void oscillator_set_waveform(oscillator_t oscillator, waveform_t waveform)
 	oscillators[(int)oscillator].waveform = waveform;
 }
 
-const uint16_t freqs[] = {
-	1746, 1850, 1960, 2077, 2200, 2331, 2469, 2616, 2772, 2937,
-	3111, 3296, 3492, 3700, 3920, 4153, 4400, 4662, 4939, 5233,
+const uint16_t periods[] = {
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (2616UL * SAMPLES_PR_WAVE),
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (2772UL * SAMPLES_PR_WAVE),
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (2937UL * SAMPLES_PR_WAVE),
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3111UL * SAMPLES_PR_WAVE),
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3296UL * SAMPLES_PR_WAVE),
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3492UL * SAMPLES_PR_WAVE),
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3700UL * SAMPLES_PR_WAVE),
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3920UL * SAMPLES_PR_WAVE),
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (4153UL * SAMPLES_PR_WAVE),
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (4400UL * SAMPLES_PR_WAVE),
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (4662UL * SAMPLES_PR_WAVE),
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (4939UL * SAMPLES_PR_WAVE)
 };
 
 void oscillator_update(oscillator_t oscillator)
@@ -137,8 +147,18 @@ void oscillator_update(oscillator_t oscillator)
 	oscillator_data_t* osc = &oscillators[(int)oscillator];
 	
 	uint16_t current = osc->timer_period;
-	uint16_t target = MAIN_CLOCK_FREQUENCY_HZ * 10 / 
-		((uint32_t)freqs[*(osc->note)] * SAMPLES_PR_WAVE);
+	
+	uint8_t scale_note = *(osc->note) % 12;
+	uint8_t octave = *(osc->note) / 12;
+	
+	uint16_t target = periods[scale_note];
+	
+	if (octave == 4) {
+		target *= 2;
+	}
+	if (octave == 6) {
+		target /= 2;
+	}
 	
 	if (target > current) {
 		if (target - current > osc->sweep_speed) {
