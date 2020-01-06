@@ -112,7 +112,7 @@ void patch_panel_update(void)
 		default: break;
 	}
 
-	if (button_event != BUTTON_NONE) {
+	if (button_event != BUTTON_NONE && button_event != BUTTON_SLIDE) {
 		keyboard_pulse_gate(KEYBOARD_1);
 		button_holdoff_timer = 50;
 	}

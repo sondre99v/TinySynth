@@ -11,6 +11,7 @@
 #include <stdint.h>
 
 #include "envelope.h"
+#include "keyboard.h"
 #include "patch_panel.h"
 
 #define EG_FAST_RISE_SPEED 255
@@ -42,7 +43,7 @@ static const patch_t default_patch = {
 	.oscB_detune = 128,
 	.oscA_enabled = true,
 	.oscB_enabled = false,
-	.glide = false,
+	.slide = false,
 	.eg_rise_speed = EG_FAST_RISE_SPEED,
 	.eg_fall_speed = EG_SLOW_FALL_SPEED
 };
@@ -55,7 +56,7 @@ static const patch_t debug_patchA = {
 	.oscB_detune = DETUNE_STEP_0,
 	.oscA_enabled = true,
 	.oscB_enabled = true,
-	.glide = false,
+	.slide = false,
 	.eg_rise_speed = EG_FAST_RISE_SPEED,
 	.eg_fall_speed = EG_FAST_FALL_SPEED
 };
@@ -75,8 +76,7 @@ void _apply_patch(const patch_t* patch)
 
 	oscillator_set_detune(OSCILLATOR_B, active_patch.oscB_detune);
 	
-	oscillator_set_sweep_speed(OSCILLATOR_A, active_patch.glide ? GLIDE_ENABLED_SPEED : GLIDE_DISABLED_SPEED);
-	oscillator_set_sweep_speed(OSCILLATOR_B, active_patch.glide ? GLIDE_ENABLED_SPEED : GLIDE_DISABLED_SPEED);
+	active_patch.slide ? keyboard_enable_slide(KEYBOARD_1) : keyboard_disable_slide(KEYBOARD_1);
 	
 	ENVELOPE_1->attack_speed = active_patch.eg_rise_speed;
 	ENVELOPE_1->hold_time = 0;
@@ -93,7 +93,7 @@ void _apply_patch(const patch_t* patch)
 	patch_panel_set_led(PATCH_LED_OSCA_WAVE, (uint8_t)active_patch.oscA_wave);
 	patch_panel_set_led(PATCH_LED_OSCB_ENABLED, (uint8_t)active_patch.oscB_enabled);
 	patch_panel_set_led(PATCH_LED_OSCB_WAVE, (uint8_t)active_patch.oscB_wave);
-	patch_panel_set_led(PATCH_LED_SLIDE, (uint8_t)active_patch.glide);
+	patch_panel_set_led(PATCH_LED_SLIDE, (uint8_t)active_patch.slide);
 	patch_panel_set_led(PATCH_LED_EG_RISE, active_patch.eg_rise_speed < EG_FAST_RISE_SPEED ? 1 : 0);
 	patch_panel_set_led(PATCH_LED_EG_FALL, active_patch.eg_fall_speed < EG_FAST_FALL_SPEED ? 1 : 0);
 	patch_panel_set_led(PATCH_LED_EFFECT, active_patch.effect);
@@ -173,7 +173,7 @@ void patch_toggle_eg_fall(void)
 
 void patch_toggle_slide(void)
 {
-	active_patch.glide = !active_patch.glide;
+	active_patch.slide = !active_patch.slide;
 	_apply_patch(&active_patch);
 }
 

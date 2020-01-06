@@ -12,25 +12,26 @@
 #include "envelope.h"
 
 
-#define SAMPLES_PR_WAVE 16
+#define WAVETABLE_LENGTH 16
+#define WAVETABLE_OCTAVE 5
 #define MAIN_CLOCK_FREQUENCY_HZ 10000000ULL
 #define MAX_SAMPLE INT8_MAX
 #define MIN_SAMPLE INT8_MIN
 
 
-static const int8_t wave_sin[SAMPLES_PR_WAVE] = {
+static const int8_t wave_sin[WAVETABLE_LENGTH] = {
 	-1, 48, 89, 117, 127, 117, 89, 48, 0, -49, -90, -118, -128, -118, -90, -49
 };
 
-static const int8_t wave_tri[SAMPLES_PR_WAVE] = {
+static const int8_t wave_tri[WAVETABLE_LENGTH] = {
 	-1, 31, 63, 95, 127, 95, 63, 31, -1, -32, -64, -96, -128, -96, -64, -32
 };
 
-static const int8_t wave_squ[SAMPLES_PR_WAVE] = {
+static const int8_t wave_squ[WAVETABLE_LENGTH] = {
 	-128, -128, -128, -128, -128, -128, -128, -128, 127, 127, 127, 127, 127, 127, 127, 127
 };
 
-static const int8_t wave_saw[SAMPLES_PR_WAVE] = {
+static const int8_t wave_saw[WAVETABLE_LENGTH] = {
 	8, 25, 42, 59, 76, 93, 110, 127, -128, -111, -94, -77, -60, -43, -26, -9
 };
 
@@ -53,6 +54,7 @@ typedef struct {
 	waveform_t waveform;
 	uint8_t* amplitude;
 	uint8_t* note;
+	int8_t* bend_amount;
 	uint16_t sweep_speed;
 	int8_t current_sample;
 	uint8_t wave_index;
@@ -128,59 +130,72 @@ void oscillator_set_waveform(oscillator_t oscillator, waveform_t waveform)
 }
 
 const uint16_t periods[] = {
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (2616UL * SAMPLES_PR_WAVE),
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (2772UL * SAMPLES_PR_WAVE),
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (2937UL * SAMPLES_PR_WAVE),
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3111UL * SAMPLES_PR_WAVE),
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3296UL * SAMPLES_PR_WAVE),
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3492UL * SAMPLES_PR_WAVE),
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3700UL * SAMPLES_PR_WAVE),
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3920UL * SAMPLES_PR_WAVE),
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (4153UL * SAMPLES_PR_WAVE),
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (4400UL * SAMPLES_PR_WAVE),
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (4662UL * SAMPLES_PR_WAVE),
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (4939UL * SAMPLES_PR_WAVE)
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (2616UL * WAVETABLE_LENGTH), // C  - 261.6 Hz
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (2772UL * WAVETABLE_LENGTH), // C# - 277.2 Hz
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (2937UL * WAVETABLE_LENGTH), // D  - 293.7 Hz
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3111UL * WAVETABLE_LENGTH), // Eb - 311.1 Hz
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3296UL * WAVETABLE_LENGTH), // E  - 329.6 Hz
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3492UL * WAVETABLE_LENGTH), // F  - 349.2 Hz
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3700UL * WAVETABLE_LENGTH), // F# - 370.0 Hz
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3920UL * WAVETABLE_LENGTH), // G  - 392.0 Hz
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (4153UL * WAVETABLE_LENGTH), // G# - 415.3 Hz
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (4400UL * WAVETABLE_LENGTH), // A  - 440.0 Hz
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (4662UL * WAVETABLE_LENGTH), // Bb - 466.2 Hz
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (4939UL * WAVETABLE_LENGTH), // B  - 493.9 Hz
+	MAIN_CLOCK_FREQUENCY_HZ * 10 / (5233UL * WAVETABLE_LENGTH)  // C  - 523.3 Hz (Used for interpolation)
 };
+
+static uint16_t modulate16(uint16_t base_value, uint16_t mod_value, int8_t mod_amount) {
+	
+	int32_t mod = (mod_value * mod_amount + mod_value * (mod_amount > 0) + 0x7F) >> 7;
+	
+	if (base_value + mod > 65535) {
+		return 65535;
+	}
+	else if (base_value + mod < 0) {
+		return 0;
+	}
+	else {
+		return base_value + mod;
+	}
+}
 
 void oscillator_update(oscillator_t oscillator)
 {
 	oscillator_data_t* osc = &oscillators[(int)oscillator];
 	
-	uint16_t current = osc->timer_period;
+	uint8_t note = *(osc->note);
 	
-	uint8_t scale_note = *(osc->note) % 12;
-	uint8_t octave = *(osc->note) / 12;
+	int8_t bend_amount = osc->bend_amount ? *(osc->bend_amount) : 0;
 	
-	uint16_t target = periods[scale_note];
-	
-	if (octave == 4) {
-		target *= 2;
-	}
-	if (octave == 6) {
-		target /= 2;
+	if (bend_amount < 0 && note > 0) {
+		bend_amount += 128;
+		note -= 1;
 	}
 	
-	if (target > current) {
-		if (target - current > osc->sweep_speed) {
-			osc->timer_period += osc->sweep_speed;
-		}
-		else {
-			osc->timer_period = target;
-		}
-	} 
-	else if (target < current) {
-		if (current - target > osc->sweep_speed) {
-			osc->timer_period -= osc->sweep_speed;
-		}
-		else {
-			osc->timer_period = target;
-		}
+	uint8_t scale_note = note % 12;
+	uint8_t octave = note / 12;
+	
+	uint16_t period0 = periods[scale_note];
+	uint16_t period1 = periods[scale_note + 1];
+	
+	uint16_t period = modulate16(period1, period0 - period1, 127 - bend_amount);
+	
+	if (octave >= WAVETABLE_OCTAVE) {
+		osc->octave = octave;
 	}
+	else {
+		period <<= WAVETABLE_OCTAVE - octave;
+		osc->octave = WAVETABLE_OCTAVE;
+	}
+	
+	osc->timer_period = period;
 }
 
-void oscillator_set_sources(oscillator_t oscillator, uint8_t* note_input, uint8_t* amplitude_input)
+void oscillator_set_sources(oscillator_t oscillator, uint8_t* note_input, int8_t* bend_input, uint8_t* amplitude_input)
 {
 	oscillators[(int)oscillator].note = note_input;
+	oscillators[(int)oscillator].bend_amount = bend_input;
 	oscillators[(int)oscillator].amplitude = amplitude_input;
 }
 
@@ -220,6 +235,9 @@ static void update_dac() {
 	volatile int16_t new_data =
 		(int16_t)oscillators[(int)OSCILLATOR_A].current_sample +
 		oscillators[(int)OSCILLATOR_B].current_sample;
+
+	// Debug attenuation for comfort
+	new_data /= 16;
 
 	// Clamp output
 	if (new_data > MAX_SAMPLE) {
@@ -297,8 +315,8 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 	update_dac();
 
 	// Compute current location within wave period
-	osc_data->wave_index += (1 << osc_data->octave);
-	if (osc_data->wave_index >= SAMPLES_PR_WAVE) {
+	osc_data->wave_index += (1 << (osc_data->octave - WAVETABLE_OCTAVE));
+	if (osc_data->wave_index >= WAVETABLE_LENGTH) {
 		osc_data->wave_index = 0;
 
 	}

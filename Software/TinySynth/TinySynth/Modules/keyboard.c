@@ -10,9 +10,12 @@
 #include <avr/io.h>
 
 
+#define SLIDE_SPEED 8
+
 typedef struct {
 	keyboard_t public;
 	uint8_t gate_pulse_timer;
+	bool slide_enabled;
 } keyboard_data_t;
 
 static keyboard_data_t KEYBOARD_DATA_1 = {0};
@@ -29,6 +32,8 @@ void keyboard_init(keyboard_t* keyboard)
 static const uint8_t thresholds[20] = {
 	8, 24, 37, 49, 62, 76, 88, 100, 113, 126, 139, 152, 164, 177, 191, 202, 213, 224, 236, 249
 };
+
+uint16_t curr_notex128 = 60 * 128;
 
 void keyboard_update(keyboard_t* keyboard)
 {
@@ -47,9 +52,25 @@ void keyboard_update(keyboard_t* keyboard)
 
 	index = 19 - index;
 	uint8_t note = index + 53;
+	uint16_t notex128 = note << 7;
 
 	if (index >= 0) {
-		data->public.note_value = note;
+		if (data->slide_enabled) {
+			if ((curr_notex128 + SLIDE_SPEED) < notex128) {
+				curr_notex128 += SLIDE_SPEED;
+			}
+			else if ((curr_notex128 - SLIDE_SPEED) > notex128) {
+				curr_notex128 -= SLIDE_SPEED;
+			}
+			else {
+				curr_notex128 = notex128;
+			}
+		}
+		else {
+			curr_notex128 = notex128;
+		}
+		data->public.note_value = curr_notex128 >> 7;
+		data->public.bend_value = curr_notex128 & 0x7F;
 		data->public.gate_value = 1;
 	}
 	else {
@@ -66,4 +87,16 @@ void keyboard_pulse_gate(keyboard_t* keyboard)
 {
 	keyboard_data_t* data = (keyboard_data_t*)keyboard;
 	data->gate_pulse_timer = 100;
+}
+
+void keyboard_enable_slide(keyboard_t* keyboard)
+{
+	keyboard_data_t* data = (keyboard_data_t*)keyboard;
+	data->slide_enabled = true;
+}
+
+void keyboard_disable_slide(keyboard_t* keyboard)
+{
+	keyboard_data_t* data = (keyboard_data_t*)keyboard;
+	data->slide_enabled = false;
 }

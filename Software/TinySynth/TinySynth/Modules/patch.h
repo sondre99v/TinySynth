@@ -26,7 +26,7 @@ typedef struct {
 	uint8_t oscB_detune;
 	bool oscA_enabled;
 	bool oscB_enabled;
-	bool glide;
+	bool slide;
 	uint8_t eg_rise_speed;
 	uint8_t eg_fall_speed;
 	effect_t effect;

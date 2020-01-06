@@ -11,9 +11,11 @@
 
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct {
 	uint8_t note_value;
+	int8_t bend_value;
 	uint8_t gate_value;
 } keyboard_t;
 
@@ -24,6 +26,9 @@ void keyboard_init(keyboard_t* keyboard);
 void keyboard_update(keyboard_t* keyboard);
 
 void keyboard_pulse_gate(keyboard_t* keyboard);
+
+void keyboard_enable_slide(keyboard_t* keyboard);
+void keyboard_disable_slide(keyboard_t* keyboard);
 
 
 #endif /* KEYBOARD_H_ */

@@ -39,8 +39,8 @@ int main(void)
 	TCD0.CTRLA = TCD_CNTPRES_DIV32_gc | TCD_ENABLE_bm;
 
 	oscillator_init();
-	oscillator_set_sources(OSCILLATOR_A, &(KEYBOARD_1->note_value), &(ENVELOPE_1->value));
-	oscillator_set_sources(OSCILLATOR_B, &(KEYBOARD_1->note_value), &(ENVELOPE_2->value));
+	oscillator_set_sources(OSCILLATOR_A, &(KEYBOARD_1->note_value), &(KEYBOARD_1->bend_value), &(ENVELOPE_1->value));
+	oscillator_set_sources(OSCILLATOR_B, &(KEYBOARD_1->note_value), &(KEYBOARD_1->bend_value), &(ENVELOPE_2->value));
 	
 	keyboard_init(KEYBOARD_1);
 	envelope_init(ENVELOPE_1);
