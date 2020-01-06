@@ -11,6 +11,13 @@
 
 #include "oscillator.h"
 
+typedef enum {
+	EFFECT_NONE = 0,
+	EFFECT_FILTER = 1,
+	EFFECT_HIT = 2,
+	EFFECT_SHAKE =3
+} effect_t;
+
 typedef struct {
 	uint8_t oscA_octave;
 	waveform_t oscA_wave;
@@ -22,18 +29,19 @@ typedef struct {
 	bool glide;
 	uint8_t eg_rise_speed;
 	uint8_t eg_fall_speed;
+	effect_t effect;
 } patch_t;
 
 void patch_init(void);
 
-void patch_cycle_oscA_octave(void);
+void patch_cycle_oscA_pitch(void);
 void patch_cycle_oscA_wave(void);
-void patch_cycle_oscB_octave(void);
+void patch_cycle_oscB_pitch(void);
 void patch_cycle_oscB_wave(void);
 void patch_toggle_eg_rise(void);
 void patch_toggle_eg_fall(void);
-void patch_cycle_oscB_detune(void);
-void patch_toggle_glide(void);
+void patch_toggle_slide(void);
+void patch_toggle_effect(void);
 
 
 #endif /* PATCH_H_ */

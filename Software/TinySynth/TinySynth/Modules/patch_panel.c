@@ -14,14 +14,14 @@
 
 typedef enum {
 	BUTTON_NONE = -1,
-	BUTTON_OSC1_OCT = 7,
+	BUTTON_OSC1_PITCH = 7,
 	BUTTON_OSC1_WAVE = 6,
 	BUTTON_EG_RISE = 5,
 	BUTTON_EG_FALL = 4,
-	BUTTON_OSC2_OCT = 3,
+	BUTTON_OSC2_PITCH = 3,
 	BUTTON_OSC2_WAVE = 2,
-	BUTTON_OSC2_TUNE = 1,
-	BUTTON_GLIDE = 0
+	BUTTON_SLIDE = 1,
+	BUTTON_EFFECT = 0
 } button_t;
 
 static button_t held_button;
@@ -85,8 +85,8 @@ void patch_panel_update(void)
 
 	switch (button_event)
 	{
-		case BUTTON_OSC1_OCT:
-			patch_cycle_oscA_octave();
+		case BUTTON_OSC1_PITCH:
+			patch_cycle_oscA_pitch();
 			break;
 		case BUTTON_OSC1_WAVE:
 			patch_cycle_oscA_wave();
@@ -97,17 +97,17 @@ void patch_panel_update(void)
 		case BUTTON_EG_FALL:
 			patch_toggle_eg_fall();
 			break;
-		case BUTTON_OSC2_OCT:
-			patch_cycle_oscB_octave();
+		case BUTTON_OSC2_PITCH:
+			patch_cycle_oscB_pitch();
 			break;
 		case BUTTON_OSC2_WAVE:
 			patch_cycle_oscB_wave();
 			break;
-		case BUTTON_OSC2_TUNE:
-			patch_cycle_oscB_detune();
+		case BUTTON_SLIDE:
+			patch_toggle_slide();
 			break;
-		case BUTTON_GLIDE:
-			patch_toggle_glide();
+		case BUTTON_EFFECT:
+			patch_toggle_effect();
 			break;
 		default: break;
 	}
@@ -122,24 +122,26 @@ void patch_panel_set_led(patch_led_t led, uint8_t value)
 {
 	switch(led) {
 		case PATCH_LED_OSCA_WAVE:
-			_set_led(6, value & 0x1);
-			_set_led(7, value & 0x2);
+			_set_led(7, value & 0x1);
 			break;
 		case PATCH_LED_OSCB_ENABLED:
-			_set_led(3, value & 0x1);
+			_set_led(4, value & 0x1);
 			break;
 		case PATCH_LED_OSCB_WAVE:
-			_set_led(1, value & 0x1);
-			_set_led(2, value & 0x2);
+			_set_led(3, value & 0x1);
 			break;
-		case PATCH_LED_GLIDE:
-			_set_led(0, value & 0x1);
+		case PATCH_LED_SLIDE:
+			_set_led(2, value & 0x1);
 			break;
 		case PATCH_LED_EG_RISE:
-			_set_led(5, value & 0x1);
+			_set_led(6, value & 0x1);
 			break;
 		case PATCH_LED_EG_FALL:
-			_set_led(4, value & 0x1);
+			_set_led(5, value & 0x1);
+			break;
+		case PATCH_LED_EFFECT:
+			_set_led(0, value & 0x1);
+			_set_led(1, value & 0x2);
 			break;
 		default:
 			break;

@@ -93,9 +93,10 @@ void _apply_patch(const patch_t* patch)
 	patch_panel_set_led(PATCH_LED_OSCA_WAVE, (uint8_t)active_patch.oscA_wave);
 	patch_panel_set_led(PATCH_LED_OSCB_ENABLED, (uint8_t)active_patch.oscB_enabled);
 	patch_panel_set_led(PATCH_LED_OSCB_WAVE, (uint8_t)active_patch.oscB_wave);
-	patch_panel_set_led(PATCH_LED_GLIDE, (uint8_t)active_patch.glide);
+	patch_panel_set_led(PATCH_LED_SLIDE, (uint8_t)active_patch.glide);
 	patch_panel_set_led(PATCH_LED_EG_RISE, active_patch.eg_rise_speed < EG_FAST_RISE_SPEED ? 1 : 0);
 	patch_panel_set_led(PATCH_LED_EG_FALL, active_patch.eg_fall_speed < EG_FAST_FALL_SPEED ? 1 : 0);
+	patch_panel_set_led(PATCH_LED_EFFECT, active_patch.effect);
 }
 
 void patch_init(void)
@@ -104,7 +105,7 @@ void patch_init(void)
 	_apply_patch(&debug_patchA);
 }
 
-void patch_cycle_oscA_octave(void)
+void patch_cycle_oscA_pitch(void)
 {
 	if (!active_patch.oscA_enabled) {
 		active_patch.oscA_enabled = true;
@@ -126,7 +127,7 @@ void patch_cycle_oscA_wave(void)
 	_apply_patch(&active_patch);
 }
 
-void patch_cycle_oscB_octave(void)
+void patch_cycle_oscB_pitch(void)
 {
 	if (!active_patch.oscB_enabled) {
 		active_patch.oscB_enabled = true;
@@ -170,21 +171,14 @@ void patch_toggle_eg_fall(void)
 	_apply_patch(&active_patch);
 }
 
-void patch_cycle_oscB_detune(void)
+void patch_toggle_slide(void)
 {
-	switch(active_patch.oscB_detune) {
-		case DETUNE_STEP_0: active_patch.oscB_detune = DETUNE_STEP_1; break;
-		case DETUNE_STEP_1: active_patch.oscB_detune = DETUNE_STEP_2; break;
-		case DETUNE_STEP_2: active_patch.oscB_detune = DETUNE_STEP_3; break;
-		case DETUNE_STEP_3: active_patch.oscB_detune = DETUNE_STEP_4; break;
-		case DETUNE_STEP_4: active_patch.oscB_detune = DETUNE_STEP_0; break;
-		default: active_patch.oscB_detune = 0; break;
-	}
+	active_patch.glide = !active_patch.glide;
 	_apply_patch(&active_patch);
 }
 
-void patch_toggle_glide(void)
+void patch_toggle_effect(void)
 {
-	active_patch.glide = !active_patch.glide;
+	active_patch.effect = (effect_t)(((int)active_patch.effect + 1) % 4);
 	_apply_patch(&active_patch);
 }
