@@ -121,7 +121,9 @@ void oscillator_init(void)
 	TCB0.CTRLA = TCB_ENABLE_bm;
 	
 	oscillators[0].filter_mod_source = &(ENVELOPE_3->value);
+	oscillators[0].filter_mod_amount = 96;
 	oscillators[1].filter_mod_source = &(ENVELOPE_3->value);
+	oscillators[1].filter_mod_amount = 96;
 }
 
 void oscillator_set_waveform(oscillator_t oscillator, waveform_t waveform)
@@ -232,7 +234,7 @@ static void update_dac() {
 		oscillators[(int)OSCILLATOR_B].current_sample;
 
 	// Debug attenuation for comfort
-	new_data /= 16;
+	new_data /= 4;
 
 	// Clamp output
 	if (new_data > MAX_SAMPLE) {
@@ -302,7 +304,7 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 	int8_t new_sample = SCALE(wave_sample, amp);
 
 	// Apply filter to compute actual sample
-	volatile uint8_t filter = modulate(osc_data->filter_value, *(osc_data->filter_mod_source), osc_data->filter_mod_amount);
+	volatile uint8_t filter = 255 - modulate(osc_data->filter_value, *(osc_data->filter_mod_source), osc_data->filter_mod_amount);
 
 	osc_data->current_sample = ((int16_t)new_sample * filter + (int16_t)osc_data->current_sample * (0x100 - (uint8_t)filter)) >> 8;
 

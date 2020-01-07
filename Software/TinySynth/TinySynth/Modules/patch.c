@@ -26,7 +26,7 @@ static const patch_t default_patch = {
 	.oscB_wave = WAVE_SAW,
 	.oscA_enabled = true,
 	.oscB_enabled = false,
-	.slide = false,
+	.slide_enabled = false,
 	.eg_rise_speed = EG_FAST_RISE_SPEED,
 	.eg_fall_speed = EG_SLOW_FALL_SPEED
 };
@@ -38,7 +38,7 @@ static const patch_t debug_patchA = {
 	.oscB_wave = WAVE_SQUARE,
 	.oscA_enabled = true,
 	.oscB_enabled = true,
-	.slide = false,
+	.slide_enabled = false,
 	.eg_rise_speed = EG_FAST_RISE_SPEED,
 	.eg_fall_speed = EG_FAST_FALL_SPEED
 };
@@ -56,7 +56,7 @@ void _apply_patch(const patch_t* patch)
 	oscillator_set_note_offset(OSCILLATOR_B, active_patch.oscB_note_offset);
 	oscillator_set_waveform(OSCILLATOR_B, active_patch.oscB_enabled ? active_patch.oscB_wave : WAVE_SILENCE);
 
-	active_patch.slide ? keyboard_enable_slide(KEYBOARD_1) : keyboard_disable_slide(KEYBOARD_1);
+	active_patch.slide_enabled ? keyboard_enable_slide(KEYBOARD_1) : keyboard_disable_slide(KEYBOARD_1);
 	
 	ENVELOPE_1->attack_speed = active_patch.eg_rise_speed;
 	ENVELOPE_1->hold_time = 0;
@@ -69,11 +69,27 @@ void _apply_patch(const patch_t* patch)
 	ENVELOPE_2->decay_speed = 255;
 	ENVELOPE_2->sustain_value = 255;
 	ENVELOPE_2->release_speed = active_patch.eg_fall_speed;
+	
+	ENVELOPE_3->attack_speed = 0;
+	ENVELOPE_3->hold_time = 0;
+	ENVELOPE_3->decay_speed = 255;
+	ENVELOPE_3->sustain_value = 255;
+	ENVELOPE_3->release_speed = 0;
+	
+	switch(active_patch.effect) {
+		case EFFECT_FILTER: 
+			ENVELOPE_3->attack_speed = 2;
+			break;
+		case EFFECT_HIT:
+			break;
+		case EFFECT_SHAKE:
+			break;
+	}
 
 	patch_panel_set_led(PATCH_LED_OSCA_WAVE, active_patch.oscA_wave == WAVE_SQUARE ? 1 : 0);
 	patch_panel_set_led(PATCH_LED_OSCB_ENABLED, (uint8_t)active_patch.oscB_enabled);
 	patch_panel_set_led(PATCH_LED_OSCB_WAVE, active_patch.oscB_wave == WAVE_SQUARE ? 1 : 0);
-	patch_panel_set_led(PATCH_LED_SLIDE, (uint8_t)active_patch.slide);
+	patch_panel_set_led(PATCH_LED_SLIDE, (uint8_t)active_patch.slide_enabled);
 	patch_panel_set_led(PATCH_LED_EG_RISE, active_patch.eg_rise_speed < EG_FAST_RISE_SPEED ? 1 : 0);
 	patch_panel_set_led(PATCH_LED_EG_FALL, active_patch.eg_fall_speed < EG_FAST_FALL_SPEED ? 1 : 0);
 	patch_panel_set_led(PATCH_LED_EFFECT, active_patch.effect);
@@ -162,7 +178,7 @@ void patch_toggle_eg_fall(void)
 
 void patch_toggle_slide(void)
 {
-	active_patch.slide = !active_patch.slide;
+	active_patch.slide_enabled = !active_patch.slide_enabled;
 	_apply_patch(&active_patch);
 }
 

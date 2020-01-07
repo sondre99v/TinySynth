@@ -20,12 +20,12 @@ typedef enum {
 
 typedef struct {
 	uint8_t oscA_note_offset;
+	bool oscA_enabled;
 	waveform_t oscA_wave;
 	uint8_t oscB_note_offset;
-	waveform_t oscB_wave;
-	bool oscA_enabled;
 	bool oscB_enabled;
-	bool slide;
+	waveform_t oscB_wave;
+	bool slide_enabled;
 	uint8_t eg_rise_speed;
 	uint8_t eg_fall_speed;
 	effect_t effect;

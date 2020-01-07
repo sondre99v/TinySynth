@@ -45,7 +45,7 @@ int main(void)
 	keyboard_init(KEYBOARD_1);
 	envelope_init(ENVELOPE_1);
 	envelope_init(ENVELOPE_2);
-	envelope_init(ENVELOPE_3);
+	//envelope_init(ENVELOPE_3);
 	ENVELOPE_1->gate_source = &(KEYBOARD_1->gate_value);
 	ENVELOPE_2->gate_source = &(KEYBOARD_1->gate_value);
 	ENVELOPE_3->gate_source = &(KEYBOARD_1->gate_value);
