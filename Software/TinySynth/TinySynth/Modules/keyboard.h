@@ -17,6 +17,7 @@ typedef struct {
 	uint8_t note_value;
 	int8_t bend_value;
 	uint8_t gate_value;
+	uint8_t trigger_value;
 } keyboard_t;
 
 

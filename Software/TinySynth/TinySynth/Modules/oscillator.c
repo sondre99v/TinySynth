@@ -304,7 +304,7 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 	int8_t new_sample = SCALE(wave_sample, amp);
 
 	// Apply filter to compute actual sample
-	volatile uint8_t filter = 255 - modulate(osc_data->filter_value, *(osc_data->filter_mod_source), osc_data->filter_mod_amount);
+	volatile uint8_t filter = modulate(osc_data->filter_value, *(osc_data->filter_mod_source), osc_data->filter_mod_amount);
 
 	osc_data->current_sample = ((int16_t)new_sample * filter + (int16_t)osc_data->current_sample * (0x100 - (uint8_t)filter)) >> 8;
 

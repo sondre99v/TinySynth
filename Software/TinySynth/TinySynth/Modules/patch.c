@@ -59,22 +59,15 @@ void _apply_patch(const patch_t* patch)
 	active_patch.slide_enabled ? keyboard_enable_slide(KEYBOARD_1) : keyboard_disable_slide(KEYBOARD_1);
 	
 	ENVELOPE_1->attack_speed = active_patch.eg_rise_speed;
-	ENVELOPE_1->hold_time = 0;
-	ENVELOPE_1->decay_speed = 255;
-	ENVELOPE_1->sustain_value = 255;
 	ENVELOPE_1->release_speed = active_patch.eg_fall_speed;
 	
 	ENVELOPE_2->attack_speed = active_patch.eg_rise_speed;
-	ENVELOPE_2->hold_time = 0;
-	ENVELOPE_2->decay_speed = 255;
-	ENVELOPE_2->sustain_value = 255;
 	ENVELOPE_2->release_speed = active_patch.eg_fall_speed;
 	
 	ENVELOPE_3->attack_speed = 0;
-	ENVELOPE_3->hold_time = 0;
-	ENVELOPE_3->decay_speed = 255;
-	ENVELOPE_3->sustain_value = 255;
 	ENVELOPE_3->release_speed = 0;
+	ENVELOPE_3->inverted = 1;
+	ENVELOPE_3->reset_on_trigger = 1;
 	
 	switch(active_patch.effect) {
 		case EFFECT_FILTER: 

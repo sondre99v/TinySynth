@@ -37,6 +37,8 @@ uint16_t curr_notex128 = 60 * 128;
 
 void keyboard_update(keyboard_t* keyboard)
 {
+	uint8_t prev_gate = keyboard->gate_value;
+	
 	keyboard_data_t* data = (keyboard_data_t*)keyboard;
 	
 	ADC0.INTFLAGS = ADC_RESRDY_bm;
@@ -81,6 +83,8 @@ void keyboard_update(keyboard_t* keyboard)
 		data->public.gate_value = 1;
 		data->gate_pulse_timer--;
 	}
+	
+	data->public.trigger_value = data->public.gate_value && !prev_gate;
 }
 
 void keyboard_pulse_gate(keyboard_t* keyboard)

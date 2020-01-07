@@ -47,8 +47,11 @@ int main(void)
 	envelope_init(ENVELOPE_2);
 	//envelope_init(ENVELOPE_3);
 	ENVELOPE_1->gate_source = &(KEYBOARD_1->gate_value);
+	ENVELOPE_1->trigger_source = &(KEYBOARD_1->trigger_value);
 	ENVELOPE_2->gate_source = &(KEYBOARD_1->gate_value);
+	ENVELOPE_2->trigger_source = &(KEYBOARD_1->trigger_value);
 	ENVELOPE_3->gate_source = &(KEYBOARD_1->gate_value);
+	ENVELOPE_3->trigger_source = &(KEYBOARD_1->trigger_value);
 	
 	patch_panel_init();
 	patch_init();
