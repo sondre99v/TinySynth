@@ -19,28 +19,11 @@
 #define EG_FAST_FALL_SPEED 50
 #define EG_SLOW_FALL_SPEED 2
 
-#define GLIDE_ENABLED_SPEED 10
-#define GLIDE_DISABLED_SPEED 65535
-
-//   0 - Unison
-//  43 - Minor third
-//  51 - Major third
-//  64 - Major fourth
-//  85 - Fifth
-// 128 - Octave
-#define DETUNE_STEP_0 0
-#define DETUNE_STEP_1 43
-#define DETUNE_STEP_2 51
-#define DETUNE_STEP_3 64
-#define DETUNE_STEP_4 85
-
-
 static const patch_t default_patch = {
-	.oscA_octave_offset = 0,
-	.oscA_wave = WAVE_SAW,
-	.oscB_octave_offset = 1,
-	.oscB_wave = WAVE_SQUARE,
-	.oscB_detune = 128,
+	.oscA_note_offset = 0,
+	.oscA_wave = WAVE_SQUARE,
+	.oscB_note_offset = 0,
+	.oscB_wave = WAVE_SAW,
 	.oscA_enabled = true,
 	.oscB_enabled = false,
 	.slide = false,
@@ -49,11 +32,10 @@ static const patch_t default_patch = {
 };
 
 static const patch_t debug_patchA = {
-	.oscA_octave_offset = 0,
+	.oscA_note_offset = 0,
 	.oscA_wave = WAVE_SQUARE,
-	.oscB_octave_offset = 0,
+	.oscB_note_offset = 0,
 	.oscB_wave = WAVE_SQUARE,
-	.oscB_detune = DETUNE_STEP_0,
 	.oscA_enabled = true,
 	.oscB_enabled = true,
 	.slide = false,
@@ -68,10 +50,10 @@ void _apply_patch(const patch_t* patch)
 {
 	active_patch = *patch;
 
-	oscillator_set_octave(OSCILLATOR_A, active_patch.oscA_octave_offset);
+	oscillator_set_note_offset(OSCILLATOR_A, active_patch.oscA_note_offset);
 	oscillator_set_waveform(OSCILLATOR_A, active_patch.oscA_enabled ? active_patch.oscA_wave : WAVE_SILENCE);
 
-	oscillator_set_octave(OSCILLATOR_B, active_patch.oscB_octave_offset);
+	oscillator_set_note_offset(OSCILLATOR_B, active_patch.oscB_note_offset);
 	oscillator_set_waveform(OSCILLATOR_B, active_patch.oscB_enabled ? active_patch.oscB_wave : WAVE_SILENCE);
 
 	active_patch.slide ? keyboard_enable_slide(KEYBOARD_1) : keyboard_disable_slide(KEYBOARD_1);
@@ -104,15 +86,10 @@ void patch_init(void)
 
 void patch_cycle_oscA_pitch(void)
 {
-	if (!active_patch.oscA_enabled) {
-		active_patch.oscA_enabled = true;
-		active_patch.oscA_octave_offset = 0;
-	}
-	else {
-		active_patch.oscA_octave_offset++;
-		if (active_patch.oscA_octave_offset > 2) {
-			active_patch.oscA_enabled = false;
-		}
+	switch(active_patch.oscA_note_offset) {
+		case 0:  active_patch.oscA_note_offset = 12; break;
+		case 12: active_patch.oscA_note_offset = 24; break;
+		default: active_patch.oscA_note_offset = 0; break;
 	}
 	
 	_apply_patch(&active_patch);
@@ -134,12 +111,15 @@ void patch_cycle_oscB_pitch(void)
 {
 	if (!active_patch.oscB_enabled) {
 		active_patch.oscB_enabled = true;
-		active_patch.oscB_octave_offset = 0;
+		active_patch.oscB_note_offset = 0;
 	}
 	else {
-		active_patch.oscB_octave_offset++;
-		if (active_patch.oscB_octave_offset > 2) {
-			active_patch.oscB_enabled = false;
+		switch(active_patch.oscB_note_offset) {
+			case 0:  active_patch.oscB_note_offset = 4; break;
+			case 4:  active_patch.oscB_note_offset = 7; break;
+			case 7:  active_patch.oscB_note_offset = 12; break;
+			case 12: active_patch.oscB_note_offset = 24; break;
+			default: active_patch.oscB_enabled = false; break;
 		}
 	}
 

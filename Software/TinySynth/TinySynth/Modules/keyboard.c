@@ -18,7 +18,7 @@ typedef struct {
 	bool slide_enabled;
 } keyboard_data_t;
 
-static keyboard_data_t KEYBOARD_DATA_1 = {0};
+static keyboard_data_t KEYBOARD_DATA_1 = {.public.note_value = 60};
 	
 keyboard_t* const KEYBOARD_1 = (keyboard_t*)&KEYBOARD_DATA_1;
 	

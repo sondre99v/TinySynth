@@ -54,6 +54,7 @@ typedef struct {
 	waveform_t waveform;
 	uint8_t* amplitude;
 	uint8_t* note;
+	int8_t note_offset;
 	int8_t* bend_amount;
 	uint16_t sweep_speed;
 	int8_t current_sample;
@@ -70,6 +71,7 @@ static oscillator_data_t oscillators[] = {
 		.waveform = WAVE_SILENCE,
 		.amplitude = 0,
 		.note = 0,
+		.note_offset = 0,
 		.sweep_speed = 65535,
 		.current_sample = 0,
 		.wave_index = 0,
@@ -83,6 +85,7 @@ static oscillator_data_t oscillators[] = {
 		.waveform = WAVE_SILENCE,
 		.amplitude = 0,
 		.note = 0,
+		.note_offset = 0,
 		.sweep_speed = 65535,
 		.current_sample = 0,
 		.wave_index = 0,
@@ -161,7 +164,7 @@ void oscillator_update(oscillator_t oscillator)
 {
 	oscillator_data_t* osc = &oscillators[(int)oscillator];
 	
-	uint8_t note = *(osc->note);
+	uint8_t note = *(osc->note) + osc->note_offset;
 	
 	int8_t bend_amount = osc->bend_amount ? *(osc->bend_amount) : 0;
 	
@@ -196,9 +199,9 @@ void oscillator_set_sources(oscillator_t oscillator, uint8_t* note_input, int8_t
 	oscillators[(int)oscillator].amplitude = amplitude_input;
 }
 
-void oscillator_set_octave(oscillator_t oscillator, uint8_t octave)
+void oscillator_set_note_offset(oscillator_t oscillator, uint8_t note_offset)
 {
-	oscillators[(int)oscillator].octave = octave;
+	oscillators[(int)oscillator].note_offset = note_offset;
 }
 
 void oscillator_set_sync(bool enabled)
@@ -319,7 +322,7 @@ ISR(TCA0_OVF_vect)
 {
 	run_oscillator(&oscillators[(int)OSCILLATOR_A]);
 
-	TCA0.SINGLE.PER = oscillators[(int)OSCILLATOR_A].timer_period;
+	TCA0.SINGLE.PER = oscillators[(int)OSCILLATOR_A].timer_period + wave_noise_get_sample() / 16;
 
 	volatile __attribute__((unused)) int16_t margin = TCA0.SINGLE.PER - TCA0.SINGLE.CNT;
 
@@ -332,7 +335,7 @@ ISR(TCB0_INT_vect)
 {
 	run_oscillator(&oscillators[(int)OSCILLATOR_B]);
 
-	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period;
+	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period + wave_noise_get_sample() / 16;
 
 	volatile __attribute__((unused)) int16_t margin = TCB0.CCMP - TCB0.CNT;
 
