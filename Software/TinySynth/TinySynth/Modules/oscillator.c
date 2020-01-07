@@ -60,7 +60,6 @@ typedef struct {
 	uint8_t wave_index;
 	uint16_t timer_period;
 	uint8_t octave;
-	uint8_t detune;
 	uint8_t filter_value;
 	uint8_t* filter_mod_source;
 	int8_t filter_mod_amount;
@@ -76,7 +75,6 @@ static oscillator_data_t oscillators[] = {
 		.wave_index = 0,
 		.octave = 0,
 		.timer_period = 2000,
-		.detune = 0,
 		.filter_value = 32,
 		.filter_mod_source = 0,
 		.filter_mod_amount = 127
@@ -90,7 +88,6 @@ static oscillator_data_t oscillators[] = {
 		.wave_index = 0,
 		.octave = 0,
 		.timer_period = 2000,
-		.detune = 0,
 		.filter_value = 32,
 		.filter_mod_source = 0,
 		.filter_mod_amount = 127
@@ -202,11 +199,6 @@ void oscillator_set_sources(oscillator_t oscillator, uint8_t* note_input, int8_t
 void oscillator_set_octave(oscillator_t oscillator, uint8_t octave)
 {
 	oscillators[(int)oscillator].octave = octave;
-}
-
-void oscillator_set_detune(oscillator_t oscillator, uint8_t detune)
-{
-	oscillators[(int)oscillator].detune = detune;
 }
 
 void oscillator_set_sync(bool enabled)
@@ -327,7 +319,7 @@ ISR(TCA0_OVF_vect)
 {
 	run_oscillator(&oscillators[(int)OSCILLATOR_A]);
 
-	TCA0.SINGLE.PER = oscillators[(int)OSCILLATOR_A].timer_period - (((uint32_t)oscillators[(int)OSCILLATOR_A].timer_period * oscillators[(int)OSCILLATOR_A].detune) >> 8);
+	TCA0.SINGLE.PER = oscillators[(int)OSCILLATOR_A].timer_period;
 
 	volatile __attribute__((unused)) int16_t margin = TCA0.SINGLE.PER - TCA0.SINGLE.CNT;
 
@@ -340,7 +332,7 @@ ISR(TCB0_INT_vect)
 {
 	run_oscillator(&oscillators[(int)OSCILLATOR_B]);
 
-	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period - (((uint32_t)oscillators[(int)OSCILLATOR_B].timer_period * oscillators[(int)OSCILLATOR_B].detune) >> 8);;
+	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period;
 
 	volatile __attribute__((unused)) int16_t margin = TCB0.CCMP - TCB0.CNT;
 

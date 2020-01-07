@@ -36,9 +36,9 @@
 
 
 static const patch_t default_patch = {
-	.oscA_octave = 0,
+	.oscA_octave_offset = 0,
 	.oscA_wave = WAVE_SAW,
-	.oscB_octave = 1,
+	.oscB_octave_offset = 1,
 	.oscB_wave = WAVE_SQUARE,
 	.oscB_detune = 128,
 	.oscA_enabled = true,
@@ -49,9 +49,9 @@ static const patch_t default_patch = {
 };
 
 static const patch_t debug_patchA = {
-	.oscA_octave = 0,
+	.oscA_octave_offset = 0,
 	.oscA_wave = WAVE_SQUARE,
-	.oscB_octave = 0,
+	.oscB_octave_offset = 0,
 	.oscB_wave = WAVE_SQUARE,
 	.oscB_detune = DETUNE_STEP_0,
 	.oscA_enabled = true,
@@ -68,14 +68,12 @@ void _apply_patch(const patch_t* patch)
 {
 	active_patch = *patch;
 
-	oscillator_set_octave(OSCILLATOR_A, active_patch.oscA_octave);
+	oscillator_set_octave(OSCILLATOR_A, active_patch.oscA_octave_offset);
 	oscillator_set_waveform(OSCILLATOR_A, active_patch.oscA_enabled ? active_patch.oscA_wave : WAVE_SILENCE);
 
-	oscillator_set_octave(OSCILLATOR_B, active_patch.oscB_octave);
+	oscillator_set_octave(OSCILLATOR_B, active_patch.oscB_octave_offset);
 	oscillator_set_waveform(OSCILLATOR_B, active_patch.oscB_enabled ? active_patch.oscB_wave : WAVE_SILENCE);
 
-	oscillator_set_detune(OSCILLATOR_B, active_patch.oscB_detune);
-	
 	active_patch.slide ? keyboard_enable_slide(KEYBOARD_1) : keyboard_disable_slide(KEYBOARD_1);
 	
 	ENVELOPE_1->attack_speed = active_patch.eg_rise_speed;
@@ -101,19 +99,19 @@ void _apply_patch(const patch_t* patch)
 
 void patch_init(void)
 {
-	//_apply_patch(&default_patch);
-	_apply_patch(&debug_patchA);
+	_apply_patch(&default_patch);
+	//_apply_patch(&debug_patchA);
 }
 
 void patch_cycle_oscA_pitch(void)
 {
 	if (!active_patch.oscA_enabled) {
 		active_patch.oscA_enabled = true;
-		active_patch.oscA_octave = 0;
+		active_patch.oscA_octave_offset = 0;
 	}
 	else {
-		active_patch.oscA_octave++;
-		if (active_patch.oscA_octave > 2) {
+		active_patch.oscA_octave_offset++;
+		if (active_patch.oscA_octave_offset > 2) {
 			active_patch.oscA_enabled = false;
 		}
 	}
@@ -131,11 +129,11 @@ void patch_cycle_oscB_pitch(void)
 {
 	if (!active_patch.oscB_enabled) {
 		active_patch.oscB_enabled = true;
-		active_patch.oscB_octave = 0;
+		active_patch.oscB_octave_offset = 0;
 	}
 	else {
-		active_patch.oscB_octave++;
-		if (active_patch.oscB_octave > 2) {
+		active_patch.oscB_octave_offset++;
+		if (active_patch.oscB_octave_offset > 2) {
 			active_patch.oscB_enabled = false;
 		}
 	}

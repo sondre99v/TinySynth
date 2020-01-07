@@ -19,9 +19,9 @@ typedef enum {
 } effect_t;
 
 typedef struct {
-	uint8_t oscA_octave;
+	uint8_t oscA_octave_offset;
 	waveform_t oscA_wave;
-	uint8_t oscB_octave;
+	uint8_t oscB_octave_offset;
 	waveform_t oscB_wave;
 	uint8_t oscB_detune;
 	bool oscA_enabled;
