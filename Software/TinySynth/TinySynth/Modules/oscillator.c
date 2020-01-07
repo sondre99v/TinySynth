@@ -77,9 +77,9 @@ static oscillator_data_t oscillators[] = {
 		.wave_index = 0,
 		.octave = 0,
 		.timer_period = 2000,
-		.filter_value = 32,
+		.filter_value = 0,
 		.filter_mod_source = 0,
-		.filter_mod_amount = 127
+		.filter_mod_amount = 96
 	},
 	{
 		.waveform = WAVE_SILENCE,
@@ -91,9 +91,9 @@ static oscillator_data_t oscillators[] = {
 		.wave_index = 0,
 		.octave = 0,
 		.timer_period = 2000,
-		.filter_value = 32,
+		.filter_value = 0,
 		.filter_mod_source = 0,
-		.filter_mod_amount = 127
+		.filter_mod_amount = 96
 	}
 };
 
@@ -121,9 +121,7 @@ void oscillator_init(void)
 	TCB0.CTRLA = TCB_ENABLE_bm;
 	
 	oscillators[0].filter_mod_source = &(ENVELOPE_3->value);
-	oscillators[0].filter_mod_amount = 96;
 	oscillators[1].filter_mod_source = &(ENVELOPE_3->value);
-	oscillators[1].filter_mod_amount = 96;
 }
 
 void oscillator_set_waveform(oscillator_t oscillator, waveform_t waveform)
@@ -306,7 +304,7 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 	// Apply filter to compute actual sample
 	volatile uint8_t filter = modulate(osc_data->filter_value, *(osc_data->filter_mod_source), osc_data->filter_mod_amount);
 
-	osc_data->current_sample = ((int16_t)new_sample * filter + (int16_t)osc_data->current_sample * (0x100 - (uint8_t)filter)) >> 8;
+	osc_data->current_sample = ((int16_t)osc_data->current_sample * filter + (int16_t)new_sample * (0x100 - (uint8_t)filter)) >> 8;
 
 
 	update_dac();
@@ -324,7 +322,7 @@ ISR(TCA0_OVF_vect)
 {
 	run_oscillator(&oscillators[(int)OSCILLATOR_A]);
 
-	TCA0.SINGLE.PER = oscillators[(int)OSCILLATOR_A].timer_period + wave_noise_get_sample() / 16;
+	TCA0.SINGLE.PER = oscillators[(int)OSCILLATOR_A].timer_period;
 
 	volatile __attribute__((unused)) int16_t margin = TCA0.SINGLE.PER - TCA0.SINGLE.CNT;
 
@@ -337,7 +335,7 @@ ISR(TCB0_INT_vect)
 {
 	run_oscillator(&oscillators[(int)OSCILLATOR_B]);
 
-	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period + wave_noise_get_sample() / 16;
+	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period;
 
 	volatile __attribute__((unused)) int16_t margin = TCB0.CCMP - TCB0.CNT;
 

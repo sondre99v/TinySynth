@@ -66,12 +66,11 @@ void _apply_patch(const patch_t* patch)
 	
 	ENVELOPE_3->attack_speed = 0;
 	ENVELOPE_3->release_speed = 0;
-	ENVELOPE_3->inverted = 1;
 	ENVELOPE_3->reset_on_trigger = 1;
 	
 	switch(active_patch.effect) {
 		case EFFECT_FILTER: 
-			ENVELOPE_3->attack_speed = 2;
+			ENVELOPE_3->attack_speed = 1;
 			break;
 		case EFFECT_HIT:
 			break;

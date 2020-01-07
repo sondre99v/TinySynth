@@ -43,7 +43,7 @@ void envelope_update(envelope_t* envelope)
 	}
 	
 	if (envelope->reset_on_trigger && trigger) {
-		envelope->value = 0;
+		envelope->value = EG_MIN;
 	}
 
 	if (gate) {
