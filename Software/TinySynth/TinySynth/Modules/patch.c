@@ -88,9 +88,9 @@ void _apply_patch(const patch_t* patch)
 	ENVELOPE_2->sustain_value = 255;
 	ENVELOPE_2->release_speed = active_patch.eg_fall_speed;
 
-	patch_panel_set_led(PATCH_LED_OSCA_WAVE, (uint8_t)active_patch.oscA_wave);
+	patch_panel_set_led(PATCH_LED_OSCA_WAVE, active_patch.oscA_wave == WAVE_SQUARE ? 1 : 0);
 	patch_panel_set_led(PATCH_LED_OSCB_ENABLED, (uint8_t)active_patch.oscB_enabled);
-	patch_panel_set_led(PATCH_LED_OSCB_WAVE, (uint8_t)active_patch.oscB_wave);
+	patch_panel_set_led(PATCH_LED_OSCB_WAVE, active_patch.oscB_wave == WAVE_SQUARE ? 1 : 0);
 	patch_panel_set_led(PATCH_LED_SLIDE, (uint8_t)active_patch.slide);
 	patch_panel_set_led(PATCH_LED_EG_RISE, active_patch.eg_rise_speed < EG_FAST_RISE_SPEED ? 1 : 0);
 	patch_panel_set_led(PATCH_LED_EG_FALL, active_patch.eg_fall_speed < EG_FAST_FALL_SPEED ? 1 : 0);
@@ -100,7 +100,6 @@ void _apply_patch(const patch_t* patch)
 void patch_init(void)
 {
 	_apply_patch(&default_patch);
-	//_apply_patch(&debug_patchA);
 }
 
 void patch_cycle_oscA_pitch(void)
@@ -115,13 +114,19 @@ void patch_cycle_oscA_pitch(void)
 			active_patch.oscA_enabled = false;
 		}
 	}
-	//active_patch.oscA_octave = (active_patch.oscA_octave + 1) % 3;
+	
 	_apply_patch(&active_patch);
 }
 
 void patch_cycle_oscA_wave(void)
 {
-	active_patch.oscA_wave = (waveform_t)((int)active_patch.oscA_wave + 1) % 5;
+	if (active_patch.oscA_wave == WAVE_SQUARE) {
+		active_patch.oscA_wave = WAVE_SAW;
+	} 
+	else {
+		active_patch.oscA_wave = WAVE_SQUARE;
+	}
+	
 	_apply_patch(&active_patch);
 }
 
@@ -143,7 +148,13 @@ void patch_cycle_oscB_pitch(void)
 
 void patch_cycle_oscB_wave(void)
 {
-	active_patch.oscB_wave = (waveform_t)((int)active_patch.oscB_wave + 1) % 5;
+	if (active_patch.oscB_wave == WAVE_SQUARE) {
+		active_patch.oscB_wave = WAVE_SAW;
+	}
+	else {
+		active_patch.oscB_wave = WAVE_SQUARE;
+	}
+	
 	_apply_patch(&active_patch);
 }
 
