@@ -139,6 +139,12 @@
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Modules\lfo.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Modules\lfo.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="Modules\module_utils.h">
       <SubType>compile</SubType>
     </Compile>

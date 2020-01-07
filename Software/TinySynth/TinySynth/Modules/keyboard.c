@@ -71,6 +71,9 @@ void keyboard_update(keyboard_t* keyboard)
 		else {
 			curr_notex128 = notex128;
 		}
+		
+		//curr_notex128 += pitch_modulation;
+		
 		data->public.note_value = curr_notex128 >> 7;
 		data->public.bend_value = curr_notex128 & 0x7F;
 		data->public.gate_value = 1;
