@@ -32,8 +32,6 @@ int main(void)
 	CCP = CCP_IOREG_gc;
 	CLKCTRL.MCLKCTRLB = 1;
 
-	int8_t bend_sum = 0;
-
 	// Setup TCD0 to give a 100Hz interrupt
 	TCD0.CMPBCLR = TIME_TIMER_PERIOD;
 	TCD0.INTCTRL = TCD_OVF_bm;
@@ -42,7 +40,7 @@ int main(void)
 	oscillator_init();
 	oscillator_set_sources(OSCILLATOR_A, &(KEYBOARD_1->note_value), &(KEYBOARD_1->bend_value), &(LFO_1->value), &(ENVELOPE_1->value));
 	oscillator_set_sources(OSCILLATOR_B, &(KEYBOARD_1->note_value), &(KEYBOARD_1->bend_value), &(LFO_1->value), &(ENVELOPE_2->value));
-	
+
 	keyboard_init(KEYBOARD_1);
 	envelope_init(ENVELOPE_1);
 	envelope_init(ENVELOPE_2);
@@ -54,10 +52,10 @@ int main(void)
 	ENVELOPE_2->trigger_source = &(KEYBOARD_1->trigger_value);
 	ENVELOPE_3->gate_source = &(KEYBOARD_1->gate_value);
 	ENVELOPE_3->trigger_source = &(KEYBOARD_1->trigger_value);
-	
+
 	patch_panel_init();
 	patch_init();
-	
+
 	sei();
 
 	while (1)
@@ -66,7 +64,6 @@ int main(void)
 			patch_panel_update();
 			keyboard_update(KEYBOARD_1);
 			lfo_update(LFO_1);
-			bend_sum = KEYBOARD_1->bend_value + LFO_1->value;
 			oscillator_update(OSCILLATOR_A);
 			oscillator_update(OSCILLATOR_B);
 			envelope_update(ENVELOPE_1);

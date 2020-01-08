@@ -123,7 +123,7 @@ void oscillator_init(void)
 	TCB0.CCMP = oscillators[(int)OSCILLATOR_B].timer_period;
 	TCB0.INTCTRL = TCB_CAPT_bm;
 	TCB0.CTRLA = TCB_ENABLE_bm;
-	
+
 	oscillators[0].filter_mod_source = &(ENVELOPE_3->value);
 	oscillators[1].filter_mod_source = &(ENVELOPE_3->value);
 }
@@ -136,9 +136,9 @@ void oscillator_set_waveform(oscillator_t oscillator, waveform_t waveform)
 #define SCALE(v, x) (( (int16_t)(v) * (x) + (v) + 0x80) >> 8)
 
 static uint8_t modulate8(uint8_t base_value, uint8_t mod_value, int8_t mod_amount) {
-	
+
 	int16_t mod = (mod_value * mod_amount + mod_value * (mod_amount > 0) + 0x7F) >> 7;
-	
+
 	if (base_value + mod > 255) {
 		return 255;
 	}
@@ -154,7 +154,7 @@ static uint16_t modulate16(uint16_t base_value, uint16_t mod_value, int16_t mod_
 	// mod_amount here is represents (-1,1) as (-128,127), but is a 16 bit variable
 	// to allow modulation beyond (-1,1)
 	int32_t mod = (mod_value * mod_amount + mod_value * (mod_amount > 0) + 0x7F) >> 7;
-	
+
 	if (base_value + mod > 65535) {
 		return 65535;
 	}
@@ -188,28 +188,28 @@ const uint16_t periods[] = {
 void oscillator_update(oscillator_t oscillator)
 {
 	oscillator_data_t* osc = &oscillators[(int)oscillator];
-	
+
 	uint8_t note = *(osc->note) + osc->note_offset;
-	
+
 	int16_t bend_amount =  osc->bend_source ? *(osc->bend_source) : 0;
 	bend_amount += SCALE(osc->pitch_mod_source ? *(osc->pitch_mod_source) : 0, osc->pitch_mod_amount);
-	
+
 	while (bend_amount < -128 && note > 0) {
 		bend_amount += 128;
 		note -= 1;
 	}
-	
+
 	while (bend_amount > 127 && note < 255) {
 		bend_amount -= 128;
 		note += 1;
 	}
-	
+
 	uint8_t scale_note = note % 12;
 	uint8_t octave = note / 12;
-	
+
 	uint16_t period0;
 	uint16_t period1;
-	
+
 	if (bend_amount < 0) {
 		period0 = periods[scale_note + 0];
 		period1 = periods[scale_note + 1];
@@ -219,9 +219,9 @@ void oscillator_update(oscillator_t oscillator)
 		period0 = periods[scale_note + 1];
 		period1 = periods[scale_note + 2];
 	}
-	
+
 	uint16_t period = modulate16(period1, period0 - period1, 127 - bend_amount);
-	
+
 	if (octave >= WAVETABLE_OCTAVE) {
 		osc->octave = octave;
 	}
@@ -229,7 +229,7 @@ void oscillator_update(oscillator_t oscillator)
 		period <<= WAVETABLE_OCTAVE - octave;
 		osc->octave = WAVETABLE_OCTAVE;
 	}
-	
+
 	osc->timer_period = period;
 }
 
@@ -303,7 +303,7 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 		osc_data->wave_index = 0;
 		osc_data->current_sample = 0;
 	}
-	
+
 	// Compute next sample value
 	volatile int8_t wave_sample;
 
@@ -327,7 +327,7 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 		wave_sample = 0;
 		break;
 	}
-	
+
 	wave_sample /= 2;
 
 	// Combine set amplitude and waveform amplitude correction
@@ -336,10 +336,10 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 	if (percussive_hit_enabled && osc_data == &oscillators[(int)OSCILLATOR_A]) {
 		wave_sample += SCALE(wave_noise_get_sample(), ENVELOPE_3->value);
 	}
-	
+
 	// Compute new sample
 	int8_t new_sample = SCALE(wave_sample, amp);
-	
+
 
 	// Apply filter to compute actual sample
 	volatile uint8_t filter = modulate8(osc_data->filter_value, *(osc_data->filter_mod_source), osc_data->filter_mod_amount);

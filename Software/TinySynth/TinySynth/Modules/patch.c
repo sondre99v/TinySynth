@@ -59,20 +59,20 @@ void _apply_patch(const patch_t* patch)
 	oscillator_set_waveform(OSCILLATOR_B, active_patch.oscB_enabled ? active_patch.oscB_wave : WAVE_SILENCE);
 	oscillator_set_filter_mod_amount(OSCILLATOR_B, 0);
 	oscillator_set_pitch_mod_amount(OSCILLATOR_B, 0);
-	
+
 	oscillator_set_percussive(false);
 
 	active_patch.slide_enabled ? keyboard_enable_slide(KEYBOARD_1) : keyboard_disable_slide(KEYBOARD_1);
-	
+
 	ENVELOPE_1->attack_speed = active_patch.eg_rise_speed;
 	ENVELOPE_1->release_speed = active_patch.eg_fall_speed;
-	
+
 	ENVELOPE_2->attack_speed = active_patch.eg_rise_speed;
 	ENVELOPE_2->release_speed = active_patch.eg_fall_speed;
-	
+
 	ENVELOPE_3->reset_on_trigger = 1;
 	ENVELOPE_3->release_on_trigger = 0;
-	
+
 	switch(active_patch.effect) {
 		case EFFECT_FILTER:
 			ENVELOPE_3->attack_speed = 1;
@@ -90,6 +90,7 @@ void _apply_patch(const patch_t* patch)
 			oscillator_set_pitch_mod_amount(OSCILLATOR_A, 64);
 			oscillator_set_pitch_mod_amount(OSCILLATOR_B, 64);
 			break;
+		default: break;
 	}
 
 	patch_panel_set_led(PATCH_LED_OSCA_WAVE, active_patch.oscA_wave == WAVE_SQUARE ? 1 : 0);
@@ -113,7 +114,7 @@ void patch_cycle_oscA_pitch(void)
 		case 12: active_patch.oscA_note_offset = 24; break;
 		default: active_patch.oscA_note_offset = 0; break;
 	}
-	
+
 	_apply_patch(&active_patch);
 }
 
@@ -125,7 +126,7 @@ void patch_cycle_oscA_wave(void)
 	else {
 		active_patch.oscA_wave = WAVE_SQUARE;
 	}
-	
+
 	_apply_patch(&active_patch);
 }
 
@@ -156,7 +157,7 @@ void patch_cycle_oscB_wave(void)
 	else {
 		active_patch.oscB_wave = WAVE_SQUARE;
 	}
-	
+
 	_apply_patch(&active_patch);
 }
 

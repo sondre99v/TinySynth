@@ -19,9 +19,9 @@ typedef struct {
 } keyboard_data_t;
 
 static keyboard_data_t KEYBOARD_DATA_1 = {.public.note_value = 60};
-	
+
 keyboard_t* const KEYBOARD_1 = (keyboard_t*)&KEYBOARD_DATA_1;
-	
+
 void keyboard_init(keyboard_t* keyboard)
 {
 	ADC0.CTRLA = ADC_RESSEL_8BIT_gc | ADC_ENABLE_bm;
@@ -38,9 +38,9 @@ uint16_t curr_notex128 = 60 * 128;
 void keyboard_update(keyboard_t* keyboard)
 {
 	uint8_t prev_gate = keyboard->gate_value;
-	
+
 	keyboard_data_t* data = (keyboard_data_t*)keyboard;
-	
+
 	ADC0.INTFLAGS = ADC_RESRDY_bm;
 	ADC0.COMMAND = ADC_STCONV_bm;
 	while (!(ADC0.INTFLAGS & ADC_RESRDY_bm)) { }
@@ -71,9 +71,9 @@ void keyboard_update(keyboard_t* keyboard)
 		else {
 			curr_notex128 = notex128;
 		}
-		
+
 		//curr_notex128 += pitch_modulation;
-		
+
 		data->public.note_value = curr_notex128 >> 7;
 		data->public.bend_value = curr_notex128 & 0x7F;
 		data->public.gate_value = 1;
@@ -86,7 +86,7 @@ void keyboard_update(keyboard_t* keyboard)
 		data->public.gate_value = 1;
 		data->gate_pulse_timer--;
 	}
-	
+
 	data->public.trigger_value = data->public.gate_value && !prev_gate;
 }
 
