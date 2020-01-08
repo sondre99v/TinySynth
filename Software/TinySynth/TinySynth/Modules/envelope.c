@@ -27,7 +27,7 @@ void envelope_init(envelope_t* envelope)
 	envelope->attack_speed = 255;
 	envelope->release_speed = 255;
 	envelope->value = EG_MIN;
-	envelope->inverted = false;
+	envelope->release_on_trigger = false;
 	envelope->reset_on_trigger = false;
 }
 
@@ -36,17 +36,12 @@ void envelope_update(envelope_t* envelope)
 	volatile uint8_t gate = (envelope->gate_source) == NULL ? 0 : *(envelope->gate_source);
 	volatile uint8_t trigger = (envelope->trigger_source) == NULL ? 0 : *(envelope->trigger_source);
 
-	// If inverted, flip value before processing, 
-	// so that inverted and non-inverted EGs can share code
-	if (envelope->inverted) {
-		envelope->value = EG_MAX - envelope->value;
-	}
-	
+
 	if (envelope->reset_on_trigger && trigger) {
 		envelope->value = EG_MIN;
 	}
 
-	if (gate) {
+	if (gate && (!envelope->release_on_trigger || trigger)) {
 		if (envelope->value < EG_MAX - envelope->attack_speed) {
 			envelope->value += envelope->attack_speed;
 		}
@@ -61,10 +56,5 @@ void envelope_update(envelope_t* envelope)
 		else {
 			envelope->value = EG_MIN;
 		}
-	}
-	
-	
-	if (envelope->inverted) {
-		envelope->value = EG_MAX - envelope->value;
 	}
 }

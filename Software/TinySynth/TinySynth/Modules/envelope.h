@@ -17,7 +17,7 @@ typedef struct {
 	uint8_t* trigger_source;
 	uint8_t attack_speed;
 	uint8_t release_speed;
-	bool inverted;
+	bool release_on_trigger;
 	bool reset_on_trigger;
 	uint8_t value;
 } envelope_t;

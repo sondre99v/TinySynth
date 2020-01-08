@@ -32,10 +32,12 @@ typedef enum {
 void oscillator_init(void);
 
 void oscillator_update(oscillator_t oscillator);
-void oscillator_set_sources(oscillator_t oscillator, uint8_t* note_input, int8_t* bend_input, uint8_t* amplitude_input);
+void oscillator_set_sources(oscillator_t oscillator, uint8_t* note_input, int8_t* bend_source1, int8_t* bend_source2, uint8_t* amplitude_input);
 void oscillator_set_waveform(oscillator_t oscillator, waveform_t waveform);
 void oscillator_set_note_offset(oscillator_t oscillator, uint8_t octave);
-void oscillator_set_sync(bool enabled);
+void oscillator_set_filter_mod_amount(oscillator_t oscillator, int8_t mod_amount);
+void oscillator_set_pitch_mod_amount(oscillator_t oscillator, int8_t mod_amount);
+void oscillator_set_percussive(bool enabled);
 void oscillator_set_sweep_speed(oscillator_t oscillator, uint16_t sweep_speed);
 
 #endif /* OSCILLATOR_H_ */

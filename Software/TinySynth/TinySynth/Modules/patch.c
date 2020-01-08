@@ -52,9 +52,15 @@ void _apply_patch(const patch_t* patch)
 
 	oscillator_set_note_offset(OSCILLATOR_A, active_patch.oscA_note_offset);
 	oscillator_set_waveform(OSCILLATOR_A, active_patch.oscA_enabled ? active_patch.oscA_wave : WAVE_SILENCE);
+	oscillator_set_filter_mod_amount(OSCILLATOR_A, 0);
+	oscillator_set_pitch_mod_amount(OSCILLATOR_A, 0);
 
 	oscillator_set_note_offset(OSCILLATOR_B, active_patch.oscB_note_offset);
 	oscillator_set_waveform(OSCILLATOR_B, active_patch.oscB_enabled ? active_patch.oscB_wave : WAVE_SILENCE);
+	oscillator_set_filter_mod_amount(OSCILLATOR_B, 0);
+	oscillator_set_pitch_mod_amount(OSCILLATOR_B, 0);
+	
+	oscillator_set_percussive(false);
 
 	active_patch.slide_enabled ? keyboard_enable_slide(KEYBOARD_1) : keyboard_disable_slide(KEYBOARD_1);
 	
@@ -64,17 +70,25 @@ void _apply_patch(const patch_t* patch)
 	ENVELOPE_2->attack_speed = active_patch.eg_rise_speed;
 	ENVELOPE_2->release_speed = active_patch.eg_fall_speed;
 	
-	ENVELOPE_3->attack_speed = 0;
-	ENVELOPE_3->release_speed = 0;
 	ENVELOPE_3->reset_on_trigger = 1;
+	ENVELOPE_3->release_on_trigger = 0;
 	
 	switch(active_patch.effect) {
-		case EFFECT_FILTER: 
+		case EFFECT_FILTER:
 			ENVELOPE_3->attack_speed = 1;
+			ENVELOPE_3->release_speed = 0;
+			oscillator_set_filter_mod_amount(OSCILLATOR_A, 96);
+			oscillator_set_filter_mod_amount(OSCILLATOR_B, 96);
 			break;
 		case EFFECT_HIT:
+			ENVELOPE_3->attack_speed = 255;
+			ENVELOPE_3->release_speed = 10;
+			ENVELOPE_3->release_on_trigger = 1;
+			oscillator_set_percussive(true);
 			break;
 		case EFFECT_SHAKE:
+			oscillator_set_pitch_mod_amount(OSCILLATOR_A, 64);
+			oscillator_set_pitch_mod_amount(OSCILLATOR_B, 64);
 			break;
 	}
 

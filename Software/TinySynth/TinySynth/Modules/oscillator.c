@@ -55,7 +55,9 @@ typedef struct {
 	uint8_t* amplitude;
 	uint8_t* note;
 	int8_t note_offset;
-	int8_t* bend_amount;
+	int8_t* bend_source;
+	int8_t* pitch_mod_source;
+	uint8_t pitch_mod_amount;
 	uint16_t sweep_speed;
 	int8_t current_sample;
 	uint8_t wave_index;
@@ -72,6 +74,7 @@ static oscillator_data_t oscillators[] = {
 		.amplitude = 0,
 		.note = 0,
 		.note_offset = 0,
+		.pitch_mod_amount = 255,
 		.sweep_speed = 65535,
 		.current_sample = 0,
 		.wave_index = 0,
@@ -79,13 +82,14 @@ static oscillator_data_t oscillators[] = {
 		.timer_period = 2000,
 		.filter_value = 0,
 		.filter_mod_source = 0,
-		.filter_mod_amount = 96
+		.filter_mod_amount = 0
 	},
 	{
 		.waveform = WAVE_SILENCE,
 		.amplitude = 0,
 		.note = 0,
 		.note_offset = 0,
+		.pitch_mod_amount = 255,
 		.sweep_speed = 65535,
 		.current_sample = 0,
 		.wave_index = 0,
@@ -93,11 +97,11 @@ static oscillator_data_t oscillators[] = {
 		.timer_period = 2000,
 		.filter_value = 0,
 		.filter_mod_source = 0,
-		.filter_mod_amount = 96
+		.filter_mod_amount = 0
 	}
 };
 
-static bool oscillator_sync = false;
+static bool percussive_hit_enabled = false;
 
 
 void oscillator_init(void)
@@ -129,24 +133,26 @@ void oscillator_set_waveform(oscillator_t oscillator, waveform_t waveform)
 	oscillators[(int)oscillator].waveform = waveform;
 }
 
-const uint16_t periods[] = {
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (2616UL * WAVETABLE_LENGTH), // C  - 261.6 Hz
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (2772UL * WAVETABLE_LENGTH), // C# - 277.2 Hz
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (2937UL * WAVETABLE_LENGTH), // D  - 293.7 Hz
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3111UL * WAVETABLE_LENGTH), // Eb - 311.1 Hz
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3296UL * WAVETABLE_LENGTH), // E  - 329.6 Hz
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3492UL * WAVETABLE_LENGTH), // F  - 349.2 Hz
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3700UL * WAVETABLE_LENGTH), // F# - 370.0 Hz
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (3920UL * WAVETABLE_LENGTH), // G  - 392.0 Hz
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (4153UL * WAVETABLE_LENGTH), // G# - 415.3 Hz
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (4400UL * WAVETABLE_LENGTH), // A  - 440.0 Hz
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (4662UL * WAVETABLE_LENGTH), // Bb - 466.2 Hz
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (4939UL * WAVETABLE_LENGTH), // B  - 493.9 Hz
-	MAIN_CLOCK_FREQUENCY_HZ * 10 / (5233UL * WAVETABLE_LENGTH)  // C  - 523.3 Hz (Used for interpolation)
-};
+#define SCALE(v, x) (( (int16_t)(v) * (x) + (v) + 0x80) >> 8)
 
-static uint16_t modulate16(uint16_t base_value, uint16_t mod_value, int8_t mod_amount) {
+static uint8_t modulate8(uint8_t base_value, uint8_t mod_value, int8_t mod_amount) {
 	
+	int16_t mod = (mod_value * mod_amount + mod_value * (mod_amount > 0) + 0x7F) >> 7;
+	
+	if (base_value + mod > 255) {
+		return 255;
+	}
+	else if (base_value + mod < 0) {
+		return 0;
+	}
+	else {
+		return base_value + mod;
+	}
+}
+
+static uint16_t modulate16(uint16_t base_value, uint16_t mod_value, int16_t mod_amount) {
+	// mod_amount here is represents (-1,1) as (-128,127), but is a 16 bit variable
+	// to allow modulation beyond (-1,1)
 	int32_t mod = (mod_value * mod_amount + mod_value * (mod_amount > 0) + 0x7F) >> 7;
 	
 	if (base_value + mod > 65535) {
@@ -160,24 +166,59 @@ static uint16_t modulate16(uint16_t base_value, uint16_t mod_value, int8_t mod_a
 	}
 }
 
+#define dHz_TO_PERIOD(dHz) (MAIN_CLOCK_FREQUENCY_HZ * 10 / ((dHz) * WAVETABLE_LENGTH))
+
+const uint16_t periods[] = {
+	dHz_TO_PERIOD(2469UL), // B  - 246.9 Hz (Used for interpolation)
+	dHz_TO_PERIOD(2616UL), // C  - 261.6 Hz
+	dHz_TO_PERIOD(2772UL), // C# - 277.2 Hz
+	dHz_TO_PERIOD(2937UL), // D  - 293.7 Hz
+	dHz_TO_PERIOD(3111UL), // Eb - 311.1 Hz
+	dHz_TO_PERIOD(3296UL), // E  - 329.6 Hz
+	dHz_TO_PERIOD(3492UL), // F  - 349.2 Hz
+	dHz_TO_PERIOD(3700UL), // F# - 370.0 Hz
+	dHz_TO_PERIOD(3920UL), // G  - 392.0 Hz
+	dHz_TO_PERIOD(4153UL), // G# - 415.3 Hz
+	dHz_TO_PERIOD(4400UL), // A  - 440.0 Hz
+	dHz_TO_PERIOD(4662UL), // Bb - 466.2 Hz
+	dHz_TO_PERIOD(4939UL), // B  - 493.9 Hz
+	dHz_TO_PERIOD(5233UL)  // C  - 523.3 Hz (Used for interpolation)
+};
+
 void oscillator_update(oscillator_t oscillator)
 {
 	oscillator_data_t* osc = &oscillators[(int)oscillator];
 	
 	uint8_t note = *(osc->note) + osc->note_offset;
 	
-	int8_t bend_amount = osc->bend_amount ? *(osc->bend_amount) : 0;
+	int16_t bend_amount =  osc->bend_source ? *(osc->bend_source) : 0;
+	bend_amount += SCALE(osc->pitch_mod_source ? *(osc->pitch_mod_source) : 0, osc->pitch_mod_amount);
 	
-	if (bend_amount < 0 && note > 0) {
+	while (bend_amount < -128 && note > 0) {
 		bend_amount += 128;
 		note -= 1;
+	}
+	
+	while (bend_amount > 127 && note < 255) {
+		bend_amount -= 128;
+		note += 1;
 	}
 	
 	uint8_t scale_note = note % 12;
 	uint8_t octave = note / 12;
 	
-	uint16_t period0 = periods[scale_note];
-	uint16_t period1 = periods[scale_note + 1];
+	uint16_t period0;
+	uint16_t period1;
+	
+	if (bend_amount < 0) {
+		period0 = periods[scale_note + 0];
+		period1 = periods[scale_note + 1];
+		bend_amount += 128;
+	}
+	else {
+		period0 = periods[scale_note + 1];
+		period1 = periods[scale_note + 2];
+	}
 	
 	uint16_t period = modulate16(period1, period0 - period1, 127 - bend_amount);
 	
@@ -192,10 +233,11 @@ void oscillator_update(oscillator_t oscillator)
 	osc->timer_period = period;
 }
 
-void oscillator_set_sources(oscillator_t oscillator, uint8_t* note_input, int8_t* bend_input, uint8_t* amplitude_input)
+void oscillator_set_sources(oscillator_t oscillator, uint8_t* note_input, int8_t* bend_source1, int8_t* bend_source2, uint8_t* amplitude_input)
 {
 	oscillators[(int)oscillator].note = note_input;
-	oscillators[(int)oscillator].bend_amount = bend_input;
+	oscillators[(int)oscillator].bend_source = bend_source1;
+	oscillators[(int)oscillator].pitch_mod_source = bend_source2;
 	oscillators[(int)oscillator].amplitude = amplitude_input;
 }
 
@@ -204,9 +246,19 @@ void oscillator_set_note_offset(oscillator_t oscillator, uint8_t note_offset)
 	oscillators[(int)oscillator].note_offset = note_offset;
 }
 
-void oscillator_set_sync(bool enabled)
+void oscillator_set_filter_mod_amount(oscillator_t oscillator, int8_t mod_amount)
 {
-	oscillator_sync = enabled;
+	oscillators[(int)oscillator].filter_mod_amount = mod_amount;
+}
+
+void oscillator_set_pitch_mod_amount(oscillator_t oscillator, int8_t mod_amount)
+{
+	oscillators[(int)oscillator].pitch_mod_amount = mod_amount;
+}
+
+void oscillator_set_percussive(bool enabled)
+{
+	percussive_hit_enabled = enabled;
 }
 
 void oscillator_set_sweep_speed(oscillator_t oscillator, uint16_t sweep_speed)
@@ -232,7 +284,7 @@ static void update_dac() {
 		oscillators[(int)OSCILLATOR_B].current_sample;
 
 	// Debug attenuation for comfort
-	new_data /= 4;
+	new_data /= 2;
 
 	// Clamp output
 	if (new_data > MAX_SAMPLE) {
@@ -244,23 +296,6 @@ static void update_dac() {
 
 	// Apply output to DAC
 	DAC0.DATA = (uint8_t)(0x80 + new_data);
-}
-
-#define SCALE(v, x) (( (int16_t)(v) * (x) + (v) + 0x80) >> 8)
-
-static uint8_t modulate(uint8_t base_value, uint8_t mod_value, int8_t mod_amount) {
-	
-	int16_t mod = (mod_value * mod_amount + mod_value * (mod_amount > 0) + 0x7F) >> 7;
-	
-	if (base_value + mod > 255) {
-		return 255;
-	}
-	else if (base_value + mod < 0) {
-		return 0;
-	}
-	else {
-		return base_value + mod;
-	}
 }
 
 static void run_oscillator(oscillator_data_t* osc_data) {
@@ -292,20 +327,24 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 		wave_sample = 0;
 		break;
 	}
+	
+	wave_sample /= 2;
 
 	// Combine set amplitude and waveform amplitude correction
 	uint8_t amp = *osc_data->amplitude;
-	uint8_t wave_amp = _get_amplitude_for_wave(osc_data->waveform);
-	amp = SCALE(amp, wave_amp);
 
+	if (percussive_hit_enabled && osc_data == &oscillators[(int)OSCILLATOR_A]) {
+		wave_sample += SCALE(wave_noise_get_sample(), ENVELOPE_3->value);
+	}
+	
 	// Compute new sample
 	int8_t new_sample = SCALE(wave_sample, amp);
+	
 
 	// Apply filter to compute actual sample
-	volatile uint8_t filter = modulate(osc_data->filter_value, *(osc_data->filter_mod_source), osc_data->filter_mod_amount);
+	volatile uint8_t filter = modulate8(osc_data->filter_value, *(osc_data->filter_mod_source), osc_data->filter_mod_amount);
 
 	osc_data->current_sample = ((int16_t)osc_data->current_sample * filter + (int16_t)new_sample * (0x100 - (uint8_t)filter)) >> 8;
-
 
 	update_dac();
 
