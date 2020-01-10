@@ -10,7 +10,7 @@
 #include <avr/io.h>
 
 
-#define SLIDE_SPEED 8
+#define SLIDE_SPEED 12
 
 typedef struct {
 	keyboard_t public;
@@ -33,10 +33,9 @@ static const uint8_t thresholds[20] = {
 	8, 24, 37, 49, 62, 76, 88, 100, 113, 126, 139, 152, 164, 177, 191, 202, 213, 224, 236, 249
 };
 
-uint16_t curr_notex128 = 60 * 128;
+uint16_t current_notex128 = 60 * 128;
+uint16_t target_notex128 = 60 * 128;
 
-uint8_t log[100] = {0};
-uint8_t log_index = 0;
 
 void keyboard_update(keyboard_t* keyboard)
 {
@@ -46,66 +45,44 @@ void keyboard_update(keyboard_t* keyboard)
 
 	keyboard_data_t* data = (keyboard_data_t*)keyboard;
 
-	/*
-	volatile uint8_t value = 0;
-	volatile uint8_t prev1 = 1;
-	volatile uint8_t prev2 = 2;
-	uint8_t counter = 0;
-	do {
-		ADC0.INTFLAGS = ADC_RESRDY_bm;
-		ADC0.COMMAND = ADC_STCONV_bm;
-		while (!(ADC0.INTFLAGS & ADC_RESRDY_bm)) { }
-		
-		prev2 = prev1;
-		prev1 = value;
-		value = ADC0.RES;
-		counter++;
-	} while(counter < 3 || (counter < 10 && (prev1 != value || prev2 != prev1)));
-	*/
 	ADC0.INTFLAGS = ADC_RESRDY_bm;
 	ADC0.COMMAND = ADC_STCONV_bm;
 	while (!(ADC0.INTFLAGS & ADC_RESRDY_bm)) { }
 		
 	volatile uint8_t adc_value = ADC0.RES;
 
-	log[log_index] = adc_value;
-	log_index = (log_index + 1) % 100;
+	volatile int8_t key = 0;
 
-	volatile int8_t index = 0;
-
-	while(index < 20 && adc_value > thresholds[index]) {
-		index++;
+	while(key < 20 && adc_value > thresholds[key]) {
+		key++;
 	}
+
+	key = 19 - key;
 	
-	if (index == 19) {
-		volatile int t = 1;
+	if (key >= 0) {
+		target_notex128 = (key + 53) << 7;
 	}
 
-	index = 19 - index;
-	uint8_t note = index + 53;
-	uint16_t notex128 = note << 7;
-
-	if (index >= 0) {
-		if (data->slide_enabled) {
-			if ((curr_notex128 + SLIDE_SPEED) < notex128) {
-				curr_notex128 += SLIDE_SPEED;
-			}
-			else if ((curr_notex128 - SLIDE_SPEED) > notex128) {
-				curr_notex128 -= SLIDE_SPEED;
-			}
-			else {
-				curr_notex128 = notex128;
-			}
+	if (data->slide_enabled) {
+		if ((current_notex128 + SLIDE_SPEED) < target_notex128) {
+			current_notex128 += SLIDE_SPEED;
+		}
+		else if ((current_notex128 - SLIDE_SPEED) > target_notex128) {
+			current_notex128 -= SLIDE_SPEED;
 		}
 		else {
-			curr_notex128 = notex128;
+			current_notex128 = target_notex128;
 		}
+	}
+	else {
+		current_notex128 = target_notex128;
+	}
 
-		//curr_notex128 += pitch_modulation;
 
-		data->public.note_value = curr_notex128 >> 7;
-		data->public.bend_value = curr_notex128 & 0x7F;
+	if (key >= 0) {
 		data->public.gate_value = 1;
+		data->public.note_value = current_notex128 >> 7;
+		data->public.bend_value = current_notex128 & 0x7F;
 	}
 	else {
 		data->public.gate_value = 0;
