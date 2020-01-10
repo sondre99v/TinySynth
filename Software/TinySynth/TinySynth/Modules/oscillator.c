@@ -309,13 +309,13 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 
 	switch(osc_data->waveform) {
 		case WAVE_SAW:
-		wave_sample = wave_saw[osc_data->wave_index];
+		wave_sample = (0xC0UL * wave_saw[osc_data->wave_index]) >> 8;
 		break;
 		case WAVE_TRIANGLE:
 		wave_sample = wave_tri[osc_data->wave_index];
 		break;
 		case WAVE_SQUARE:
-		wave_sample = wave_squ[osc_data->wave_index];
+		wave_sample = (0x80UL * wave_squ[osc_data->wave_index]) >> 8;
 		break;
 		case WAVE_SINE:
 		wave_sample = wave_sin[osc_data->wave_index];
@@ -334,7 +334,7 @@ static void run_oscillator(oscillator_data_t* osc_data) {
 	uint8_t amp = *osc_data->amplitude;
 
 	if (percussive_hit_enabled && osc_data == &oscillators[(int)OSCILLATOR_A]) {
-		wave_sample += SCALE(wave_noise_get_sample(), ENVELOPE_3->value);
+		wave_sample += SCALE(wave_noise_get_sample() / 2, ENVELOPE_3->value);
 	}
 
 	// Compute new sample

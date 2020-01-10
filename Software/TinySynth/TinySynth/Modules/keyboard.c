@@ -35,21 +35,50 @@ static const uint8_t thresholds[20] = {
 
 uint16_t curr_notex128 = 60 * 128;
 
+uint8_t log[100] = {0};
+uint8_t log_index = 0;
+
 void keyboard_update(keyboard_t* keyboard)
 {
+	static uint8_t prev_adc = 255;
+	
 	uint8_t prev_gate = keyboard->gate_value;
 
 	keyboard_data_t* data = (keyboard_data_t*)keyboard;
 
+	/*
+	volatile uint8_t value = 0;
+	volatile uint8_t prev1 = 1;
+	volatile uint8_t prev2 = 2;
+	uint8_t counter = 0;
+	do {
+		ADC0.INTFLAGS = ADC_RESRDY_bm;
+		ADC0.COMMAND = ADC_STCONV_bm;
+		while (!(ADC0.INTFLAGS & ADC_RESRDY_bm)) { }
+		
+		prev2 = prev1;
+		prev1 = value;
+		value = ADC0.RES;
+		counter++;
+	} while(counter < 3 || (counter < 10 && (prev1 != value || prev2 != prev1)));
+	*/
 	ADC0.INTFLAGS = ADC_RESRDY_bm;
 	ADC0.COMMAND = ADC_STCONV_bm;
 	while (!(ADC0.INTFLAGS & ADC_RESRDY_bm)) { }
+		
 	volatile uint8_t adc_value = ADC0.RES;
 
-	int8_t index = 0;
+	log[log_index] = adc_value;
+	log_index = (log_index + 1) % 100;
+
+	volatile int8_t index = 0;
 
 	while(index < 20 && adc_value > thresholds[index]) {
 		index++;
+	}
+	
+	if (index == 19) {
+		volatile int t = 1;
 	}
 
 	index = 19 - index;
